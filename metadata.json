@@ -1,0 +1,8 @@
+{
+  "name": "SI SELAMAT",
+  "description": "Sistem Informasi Surat Elektronik & Layanan Administrasi Masyarakat Desa Tanjung Selamat",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

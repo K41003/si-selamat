@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <script>
+      (function() {
+        try {
+          var _fetch = window.fetch ? window.fetch.bind(window) : undefined;
+          Object.defineProperty(window, 'fetch', {
+            get: function() { return _fetch; },
+            set: function(val) { _fetch = val; },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {
+          try {
+            var _protoFetch = Window.prototype.fetch;
+            Object.defineProperty(Window.prototype, 'fetch', {
+              get: function() { return _protoFetch; },
+              set: function(val) { _protoFetch = val; },
+              configurable: true,
+              enumerable: true
+            });
+          } catch (e2) {}
+        }
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SI SELAMAT - Sistem Informasi Surat Elektronik &amp; Layanan Administrasi Masyarakat</title>
+    <meta name="description" content="Sistem Informasi Surat Elektronik &amp; Layanan Administrasi Masyarakat Desa Tanjung Selamat" />
+    <meta property="og:title" content="SI SELAMAT - Sistem Informasi Surat Elektronik &amp; Layanan Administrasi Masyarakat" />
+    <meta property="og:description" content="Sistem Informasi Surat Elektronik &amp; Layanan Administrasi Masyarakat Desa Tanjung Selamat" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+  </head>
+  <body class="bg-slate-50 text-slate-800 antialiased selection:bg-slate-800 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
