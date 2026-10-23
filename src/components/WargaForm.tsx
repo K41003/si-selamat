@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StorageService } from '../services/storage';
+import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Warga } from '../types';
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
@@ -41,7 +42,7 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
           no_kk: existing.no_kk || '',
           nama: existing.nama || '',
           tempat_lahir: existing.tempat_lahir || '',
-          tanggal_lahir: existing.tanggal_lahir || '',
+          tanggal_lahir: existing.tanggal_lahir ? String(existing.tanggal_lahir).substring(0, 10) : '',
           jenis_kelamin: (existing.jenis_kelamin as any) || 'Laki-laki',
           agama: existing.agama || 'Islam',
           pekerjaan: existing.pekerjaan || '',
@@ -50,6 +51,26 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
           rt: existing.rt || '',
           rw: existing.rw || '',
           no_hp: existing.no_hp || '',
+        });
+      } else {
+        ApiService.getWargaById(wargaId).then(apiWarga => {
+          if (apiWarga) {
+            setFormData({
+              nik: apiWarga.nik || '',
+              no_kk: apiWarga.no_kk || '',
+              nama: apiWarga.nama || '',
+              tempat_lahir: apiWarga.tempat_lahir || '',
+              tanggal_lahir: apiWarga.tanggal_lahir ? String(apiWarga.tanggal_lahir).substring(0, 10) : '',
+              jenis_kelamin: (apiWarga.jenis_kelamin as any) || 'Laki-laki',
+              agama: apiWarga.agama || 'Islam',
+              pekerjaan: apiWarga.pekerjaan || '',
+              status_perkawinan: (apiWarga.status_perkawinan as any) || 'Belum Kawin',
+              alamat: apiWarga.alamat || '',
+              rt: apiWarga.rt || '',
+              rw: apiWarga.rw || '',
+              no_hp: apiWarga.no_hp || '',
+            });
+          }
         });
       }
     }
@@ -81,13 +102,15 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate() || !user) return;
 
     if (isEdit && wargaId) {
+      await ApiService.updateWarga(wargaId, formData);
       StorageService.updateWarga(wargaId, formData, user.name, user.role);
     } else {
+      await ApiService.createWarga(formData);
       StorageService.addWarga(formData, user.name, user.role);
     }
 

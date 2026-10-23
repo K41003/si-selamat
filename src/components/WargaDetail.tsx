@@ -3,6 +3,9 @@ import { StorageService } from '../services/storage';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, Edit2, FileText, UserCheck, Plus } from 'lucide-react';
 
+import { ApiService } from '../services/api';
+import { Warga } from '../types';
+
 interface WargaDetailProps {
   wargaId: number;
   onNavigate: (view: string) => void;
@@ -14,7 +17,18 @@ export const WargaDetail: React.FC<WargaDetailProps> = ({ wargaId, onNavigate })
   const suratList = StorageService.getSuratList();
   const jenisList = StorageService.getJenisSurat();
 
-  const warga = wargaList.find(w => w.id === wargaId);
+  const [warga, setWarga] = React.useState<Warga | null>(() => {
+    return wargaList.find(w => w.id === wargaId) || null;
+  });
+
+  React.useEffect(() => {
+    if (!warga) {
+      ApiService.getWargaById(wargaId).then(res => {
+        if (res) setWarga(res);
+      });
+    }
+  }, [wargaId, warga]);
+
   const riwayatSurat = suratList.filter(s => s.warga_id === wargaId);
 
   if (!warga) {

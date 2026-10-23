@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StorageService } from '../services/storage';
+import { ApiService } from '../services/api';
 import { Users, FileEdit, Clock, CheckCircle, Plus, FilePlus } from 'lucide-react';
 import { SelectJenisSuratModal } from './SelectJenisSuratModal';
 
@@ -13,7 +14,15 @@ export const DashboardStaff: React.FC<DashboardStaffProps> = ({ onNavigate }) =>
   const suratList = StorageService.getSuratList();
   const jenisList = StorageService.getJenisSurat();
 
-  const totalWarga = wargaList.length;
+  const [dbTotalWarga, setDbTotalWarga] = useState<number | null>(null);
+
+  useEffect(() => {
+    ApiService.getStats().then(stats => {
+      if (stats) setDbTotalWarga(stats.total_warga);
+    });
+  }, []);
+
+  const totalWarga = dbTotalWarga ?? wargaList.length;
   const totalSuratDraft = suratList.filter(s => s.status === 'draft').length;
   const totalSuratDiajukan = suratList.filter(s => s.status === 'diajukan').length;
   const totalSuratDisetujui = suratList.filter(s => s.status === 'disetujui').length;
