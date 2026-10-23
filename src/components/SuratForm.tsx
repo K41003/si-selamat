@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { StorageService } from '../services/storage';
+import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Warga } from '../types';
 import {
@@ -82,6 +83,15 @@ export const SuratForm: React.FC<SuratFormProps> = ({
     if (match) {
       setSelectedWarga(match);
       setErrorMessage(null);
+    } else if (cleanNik.length >= 10) {
+      ApiService.getWargaByNik(cleanNik).then(found => {
+        if (found) {
+          setSelectedWarga(found);
+          setErrorMessage(null);
+        } else {
+          setSelectedWarga(null);
+        }
+      });
     } else {
       setSelectedWarga(null);
     }
