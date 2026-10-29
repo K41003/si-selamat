@@ -70,9 +70,21 @@ export const StorageService = {
     localStorage.setItem(KEYS.WARGA, JSON.stringify(list));
   },
 
-  addWarga(data: Omit<Warga, 'id' | 'created_at' | 'updated_at'>, actorName: string, actorRole: string): Warga {
+  upsertWarga(warga: Warga): Warga {
     const list = this.getWargaList();
-    const newId = list.length > 0 ? Math.max(...list.map(w => w.id)) + 1 : 1;
+    const index = list.findIndex(w => w.id === warga.id || (warga.nik && w.nik === warga.nik));
+    if (index >= 0) {
+      list[index] = { ...list[index], ...warga };
+    } else {
+      list.unshift(warga);
+    }
+    this.saveWargaList(list);
+    return warga;
+  },
+
+  addWarga(data: Omit<Warga, 'id' | 'created_at' | 'updated_at'> & { id?: number }, actorName: string, actorRole: string): Warga {
+    const list = this.getWargaList();
+    const newId = data.id || (list.length > 0 ? Math.max(...list.map(w => w.id)) + 1 : 1);
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
     const newWarga: Warga = {
       ...data,
@@ -80,7 +92,7 @@ export const StorageService = {
       created_at: now,
       updated_at: now,
     };
-    const updated = [newWarga, ...list];
+    const updated = [newWarga, ...list.filter(w => w.id !== newId && w.nik !== newWarga.nik)];
     this.saveWargaList(updated);
 
     this.addLog({
@@ -169,7 +181,8 @@ export const StorageService = {
     jenisSuratId: number,
     status: 'draft' | 'diajukan',
     dataIsian: Record<string, string>,
-    actor: User
+    actor: User,
+    wargaSnapshot?: Warga
   ): Surat {
     const list = this.getSuratList();
     const jenisList = this.getJenisSurat();
@@ -193,6 +206,7 @@ export const StorageService = {
       id: list.length > 0 ? Math.max(...list.map(s => s.id)) + 1 : 1,
       nomor_surat: nomorSurat,
       warga_id: wargaId,
+      warga: wargaSnapshot,
       jenis_surat_id: jenisSuratId,
       status,
       data_isian: dataIsian,
@@ -203,17 +217,20 @@ export const StorageService = {
       updated_at: timeStr,
     };
 
+    if (wargaSnapshot) {
+      this.upsertWarga(wargaSnapshot);
+    }
+
     const updated = [newSurat, ...list];
     this.saveSuratList(updated);
 
-    const wargaList = this.getWargaList();
-    const warga = wargaList.find(w => w.id === wargaId);
+    const targetWargaNama = wargaSnapshot?.nama || this.getWargaList().find(w => w.id === wargaId)?.nama || '';
 
     this.addLog({
       user_name: authorDisplayName,
       user_role: actor.role === 'staff' ? 'Staff Pelayanan' : 'Kepala Desa',
       aksi: status === 'draft' ? 'Simpan Draft Surat' : 'Buat Permohonan Surat',
-      deskripsi: `${status === 'draft' ? 'Menyimpan draft' : 'Membuat permohonan'} surat ${jenis?.nama_jenis || ''} untuk warga ${warga?.nama || ''}`,
+      deskripsi: `${status === 'draft' ? 'Menyimpan draft' : 'Membuat permohonan'} surat ${jenis?.nama_jenis || ''} untuk warga ${targetWargaNama}`,
       model_type: 'Surat',
       model_id: newSurat.id,
     });
@@ -227,7 +244,8 @@ export const StorageService = {
     jenisSuratId: number,
     status: 'draft' | 'diajukan',
     dataIsian: Record<string, string>,
-    actor: User
+    actor: User,
+    wargaSnapshot?: Warga
   ): Surat | null {
     const list = this.getSuratList();
     const index = list.findIndex(s => s.id === id);
@@ -243,11 +261,16 @@ export const StorageService = {
     const updated: Surat = {
       ...current,
       warga_id: wargaId,
+      warga: wargaSnapshot || current.warga,
       jenis_surat_id: jenisSuratId,
       status,
       data_isian: dataIsian,
       updated_at: now,
     };
+
+    if (wargaSnapshot) {
+      this.upsertWarga(wargaSnapshot);
+    }
 
     list[index] = updated;
     this.saveSuratList(list);
@@ -265,6 +288,21 @@ export const StorageService = {
     });
 
     return updated;
+  },
+
+  attachWargaToSurat(suratId: number, warga: Warga): Surat | null {
+    const list = this.getSuratList();
+    const index = list.findIndex(s => s.id === suratId);
+    if (index === -1) return null;
+
+    list[index] = {
+      ...list[index],
+      warga_id: warga.id,
+      warga: warga,
+    };
+    this.saveSuratList(list);
+    this.upsertWarga(warga);
+    return list[index];
   },
 
   deleteSurat(id: number, actor: User): boolean {

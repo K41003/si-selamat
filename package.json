@@ -3,9 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "vite --config vite.config.ts --host 0.0.0.0 --port 5173",
-        "dev:laravel": "vite --config vite.config.js",
-        "serve:laravel": "php -S 127.0.0.1:8000 server.php",
+        "dev": "vite --host 0.0.0.0 --port 3000",
         "build": "vite build",
         "lint": "tsc --noEmit",
         "preview": "vite preview --host 0.0.0.0 --port 3000",

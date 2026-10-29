@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StorageService } from '../services/storage';
 import { useAuth } from '../context/AuthContext';
+import { formatTempatTanggalLahir } from '../utils';
 import { Surat } from '../types';
 import { ArrowLeft, CheckCircle, XCircle, Printer, Send, QrCode, ShieldCheck, FileText, User, Edit, Trash2 } from 'lucide-react';
 
@@ -68,7 +69,7 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200">
         <div className="flex items-center gap-3">
           <button
             onClick={() => onNavigate('surat')}
@@ -77,47 +78,53 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-slate-900">{surat.nomor_surat}</h1>
-              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase ${
-                surat.status === 'disetujui' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20' :
-                surat.status === 'diajukan' ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/20' :
-                surat.status === 'ditolak' ? 'bg-red-50 text-red-700 ring-1 ring-red-600/20' :
-                'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20'
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-xl font-bold font-mono tracking-tight text-slate-900">{surat.nomor_surat}</h1>
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-semibold rounded-md border ${
+                surat.status === 'disetujui' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                surat.status === 'diajukan' ? 'bg-[#1E3A8A]/10 text-[#1E3A8A] border-[#1E3A8A]/20' :
+                surat.status === 'ditolak' ? 'bg-rose-50 text-rose-800 border-rose-200' :
+                'bg-slate-100 text-slate-700 border-slate-200'
               }`}>
-                {surat.status}
+                <span className={`h-1.5 w-1.5 rounded-full ${
+                  surat.status === 'disetujui' ? 'bg-emerald-600' :
+                  surat.status === 'diajukan' ? 'bg-[#1E3A8A]' :
+                  surat.status === 'ditolak' ? 'bg-rose-600' :
+                  'bg-amber-500'
+                }`}></span>
+                {surat.status.toUpperCase()}
               </span>
             </div>
-            <p className="text-sm text-slate-500">{jenis?.nama_jenis}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{jenis?.nama_jenis}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {surat.status === 'draft' && user?.role === 'staff' && (
             <>
               <button
                 onClick={() => onNavigate(`surat_edit_${surat.id}`)}
                 data-testid="btn-detail-edit-draft"
-                className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
               >
-                <Edit className="h-3.5 w-3.5" />
-                Edit Draft
+                <Edit className="h-3.5 w-3.5 text-slate-400 stroke-[1.8]" />
+                <span>Edit Draft</span>
               </button>
               <button
                 onClick={handleAjukan}
                 data-testid="btn-detail-ajukan"
-                className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition shadow-xs"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1E3A8A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#172554] transition shadow-xs"
               >
-                <Send className="h-3.5 w-3.5" />
-                Ajukan ke Kades
+                <Send className="h-3.5 w-3.5 stroke-[1.8]" />
+                <span>Ajukan ke Kades</span>
               </button>
               <button
                 onClick={handleDeleteDraft}
                 data-testid="btn-detail-hapus"
-                className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition"
+                className="inline-flex items-center gap-1 rounded-xl border border-transparent px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition"
               >
-                <Trash2 className="h-3.5 w-3.5" />
-                Hapus
+                <Trash2 className="h-3.5 w-3.5 text-slate-400 hover:text-rose-600 stroke-[1.8]" />
+                <span>Hapus</span>
               </button>
             </>
           )}
@@ -126,53 +133,52 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
             <button
               onClick={() => onNavigate(`surat_print_${surat.id}`)}
               data-testid="btn-detail-print"
-              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 transition shadow-xs"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#172554] transition active:scale-95 shadow-sm"
             >
-              <Printer className="h-3.5 w-3.5" />
-              Cetak / Unduh Surat
+              <Printer className="h-4 w-4 stroke-[1.8]" />
+              <span>Cetak / Unduh Berkas Resmi</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Kades Action Panel (When in 'diajukan' status and user is Kades) */}
+      {/* Kades Action Panel - Clean light styling */}
       {user?.role === 'kades' && surat.status === 'diajukan' && (
-        <div data-testid="kades-validation-panel" className="rounded-xl bg-slate-900 p-6 text-white shadow-md">
-          <div className="flex items-center gap-2.5 mb-3 text-emerald-400">
+        <div data-testid="kades-validation-panel" className="rounded-2xl bg-white p-5 text-slate-900 border border-slate-200 shadow-2xs space-y-4">
+          <div className="flex items-center gap-2 text-[#1E3A8A]">
             <ShieldCheck className="h-5 w-5" />
-            <h3 className="text-base font-bold">Pengesahan Tanda Tangan Elektronik (E-Signature)</h3>
+            <h3 className="text-sm font-bold text-slate-900">Panel Pengesahan Kepala Desa</h3>
           </div>
-          <p className="text-xs text-slate-300 mb-4 leading-relaxed">
-            Sebagai Kepala Desa, Anda dapat menyetujui permohonan ini untuk otomatis membubuhkan QR Code E-Signature resmi, atau menolak jika terdapat data yang kurang lengkap.
-          </p>
 
-          <div className="mb-4">
-            <label className="block text-xs font-medium text-slate-300 mb-1">Catatan Persetujuan (Opsional):</label>
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+              Catatan Persetujuan:
+            </label>
             <input
               type="text"
               data-testid="input-approve-notes"
               value={approveNotes}
               onChange={e => setApproveNotes(e.target.value)}
-              className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-400"
+              className="w-full rounded-lg bg-white text-slate-900 border border-slate-200 px-3 py-2 text-xs font-normal focus:outline-none focus:border-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]/20"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-2.5">
             <button
               onClick={() => setRejectModalOpen(true)}
               data-testid="btn-kades-reject"
-              className="flex items-center gap-1.5 rounded-lg border border-red-500/50 bg-red-950/40 px-4 py-2 text-xs font-semibold text-red-300 hover:bg-red-900/60 transition"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition"
             >
-              <XCircle className="h-4 w-4" />
-              Tolak Permohonan
+              <XCircle className="h-4 w-4 stroke-[1.8]" />
+              <span>Tolak Permohonan</span>
             </button>
             <button
               onClick={handleApprove}
               data-testid="btn-kades-approve"
-              className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-5 py-2 text-xs font-bold text-slate-950 hover:bg-emerald-400 transition shadow-xs"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] hover:bg-[#172554] text-white px-5 py-2 text-xs font-semibold transition active:scale-95 shadow-sm"
             >
-              <CheckCircle className="h-4 w-4" />
-              Setujui &amp; Tanda Tangani (QR E-Signature)
+              <CheckCircle className="h-4 w-4 stroke-[2]" />
+              <span>Sahkan &amp; Tanda Tangani (QR E-Signature)</span>
             </button>
           </div>
         </div>
@@ -180,18 +186,18 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
 
       {/* Validation Status Summary Card */}
       {surat.validasi && (
-        <div className={`rounded-xl p-5 ring-1 ${
+        <div className={`rounded-xl p-4 border ${
           surat.validasi.status === 'disetujui'
-            ? 'bg-emerald-50/70 ring-emerald-200 text-emerald-900'
-            : 'bg-red-50/70 ring-red-200 text-red-900'
+            ? 'bg-slate-50 border-slate-200 text-slate-950'
+            : 'bg-rose-50/50 border-rose-200 text-rose-950'
         }`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="rounded-lg bg-white p-2 shadow-xs ring-1 ring-slate-200 shrink-0">
-                <QrCode className="h-8 w-8 text-slate-800" />
+              <div className="rounded-md bg-white p-2 border border-slate-200 shrink-0">
+                <QrCode className="h-6 w-6 text-slate-800" />
               </div>
               <div>
-                <h3 className="font-bold text-sm">
+                <h3 className="font-semibold text-xs text-slate-900">
                   {surat.validasi.status === 'disetujui' ? 'Tervalidasi Resmi (E-Signature)' : 'Permohonan Ditolak'}
                 </h3>
                 <p className="text-xs text-slate-600 mt-0.5">
@@ -204,7 +210,7 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
                 )}
               </div>
             </div>
-            <div className="text-right font-mono text-[11px] text-slate-500">
+            <div className="text-right font-mono text-[11px] text-slate-500 tabular-nums">
               <span>Token: {surat.validasi.qr_code_token}</span>
             </div>
           </div>
@@ -213,16 +219,16 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
 
       {/* Rejection Notice if rejected without full validasi */}
       {surat.status === 'ditolak' && surat.catatan_penolakan && !surat.validasi && (
-        <div className="rounded-xl bg-red-50 p-4 ring-1 ring-red-200 text-red-800 text-sm">
+        <div className="rounded-xl bg-rose-50 p-4 border border-rose-200 text-rose-800 text-xs">
           <p className="font-semibold">Catatan Penolakan:</p>
-          <p className="mt-1 text-xs">{surat.catatan_penolakan}</p>
+          <p className="mt-1">{surat.catatan_penolakan}</p>
         </div>
       )}
 
       {/* Warga & Surat Content Details */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Warga Info */}
-        <div className="rounded-xl bg-white p-6 shadow-xs ring-1 ring-slate-200">
+        <div className="rounded-xl bg-white p-5 border border-slate-200">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3 mb-4">
             <User className="h-4 w-4 text-slate-500" />
             <h2 className="text-base font-semibold text-slate-900">Identitas Pemohon</h2>
@@ -239,7 +245,7 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
               </div>
               <div>
                 <dt className="text-xs font-medium text-slate-400 uppercase">Tempat, Tanggal Lahir</dt>
-                <dd className="text-slate-800 mt-0.5">{warga.tempat_lahir || '-'}, {warga.tanggal_lahir || '-'}</dd>
+                <dd className="text-slate-800 mt-0.5">{formatTempatTanggalLahir(warga.tempat_lahir, warga.tanggal_lahir)}</dd>
               </div>
               <div>
                 <dt className="text-xs font-medium text-slate-400 uppercase">Jenis Kelamin &amp; Agama</dt>
@@ -260,7 +266,7 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
         </div>
 
         {/* Data Isian Surat */}
-        <div className="rounded-xl bg-white p-6 shadow-xs ring-1 ring-slate-200">
+        <div className="rounded-xl bg-white p-5 border border-slate-200">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3 mb-4">
             <FileText className="h-4 w-4 text-slate-500" />
             <h2 className="text-base font-semibold text-slate-900">Isian Surat: {jenis?.nama_jenis}</h2>
@@ -282,27 +288,24 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
 
       {/* Reject Modal */}
       {rejectModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs px-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl ring-1 ring-slate-200">
-            <h3 className="text-base font-semibold text-slate-900">Tolak Permohonan Surat</h3>
-            <p className="mt-1 text-xs text-slate-500">
-              Sebutkan alasan penolakan agar staff dapat melengkapi atau memberitahukan kepada warga.
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
+            <h3 className="text-base font-bold text-slate-900">Tolak Permohonan Surat</h3>
             <div className="mt-4">
-              <label className="block text-xs font-medium text-slate-700 mb-1">Alasan Penolakan:</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Alasan Penolakan:</label>
               <textarea
                 rows={3}
                 value={rejectReason}
                 onChange={e => setRejectReason(e.target.value)}
-                placeholder="Contoh: Dokumen KK belum diperbarui / Alamat usaha tidak sesuai..."
-                className="w-full rounded-lg border border-slate-300 p-2.5 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                placeholder="Contoh: Dokumen KK belum diperbarui..."
+                className="w-full rounded-xl border border-slate-200 p-3 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
               />
             </div>
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setRejectModalOpen(false)}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
               >
                 Batal
               </button>
@@ -310,9 +313,9 @@ export const SuratDetail: React.FC<SuratDetailProps> = ({ suratId, onNavigate })
                 type="button"
                 onClick={handleReject}
                 disabled={!rejectReason.trim()}
-                className="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 transition disabled:opacity-50"
               >
-                Konfirmasi Penolakan
+                Tolak Permohonan
               </button>
             </div>
           </div>
