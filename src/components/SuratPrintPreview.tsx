@@ -1,5 +1,6 @@
 import React from 'react';
 import { StorageService } from '../services/storage';
+import { formatTempatTanggalLahir } from '../utils';
 import { ArrowLeft, Printer, Download } from 'lucide-react';
 
 interface SuratPrintPreviewProps {
@@ -22,7 +23,7 @@ export const SuratPrintPreview: React.FC<SuratPrintPreviewProps> = ({ suratId, o
         <p className="text-slate-500">Berkas surat tidak lengkap untuk dicetak.</p>
         <button
           onClick={() => onNavigate('arsip')}
-          className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+          className="mt-4 rounded-xl bg-[#1E3A8A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#172554] transition"
         >
           Kembali
         </button>
@@ -43,27 +44,27 @@ export const SuratPrintPreview: React.FC<SuratPrintPreviewProps> = ({ suratId, o
   return (
     <div className="space-y-6">
       {/* Top Control Bar (Hidden on print) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
+        <div className="flex items-center gap-3.5">
           <button
             onClick={() => onNavigate('arsip')}
-            className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 transition"
+            className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition shadow-2xs"
+            title="Kembali ke Arsip"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Pratinjau Cetak Surat Resmi</h1>
-            <p className="text-xs text-slate-500">Format surat baku Desa Tanjung Selamat dengan tanda tangan elektronik.</p>
+            <h1 className="text-2xl font-bold text-slate-900">Pratinjau Dokumen Cetak</h1>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             id="btn-print-surat"
             onClick={handlePrint}
-            className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition shadow-xs"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#172554] transition active:scale-95 shadow-sm"
           >
-            <Printer className="h-4 w-4" />
-            Cetak / Simpan PDF
+            <Printer className="h-4 w-4 stroke-[2]" />
+            <span>Cetak / Simpan PDF</span>
           </button>
         </div>
       </div>
@@ -117,7 +118,7 @@ export const SuratPrintPreview: React.FC<SuratPrintPreviewProps> = ({ suratId, o
               <tr>
                 <td className="py-1 font-medium">Tempat / Tgl. Lahir</td>
                 <td className="py-1">:</td>
-                <td className="py-1">{warga.tempat_lahir || '-'}, {warga.tanggal_lahir || '-'}</td>
+                <td className="py-1">{formatTempatTanggalLahir(warga.tempat_lahir, warga.tanggal_lahir)}</td>
               </tr>
               <tr>
                 <td className="py-1 font-medium">Jenis Kelamin</td>
@@ -245,7 +246,7 @@ export const SuratPrintPreview: React.FC<SuratPrintPreviewProps> = ({ suratId, o
               <span className="text-[9px] font-mono mt-1 text-slate-600 block">
                 {surat.validasi?.qr_code_token || `QR-TS-E-SIGN-${surat.id}`}
               </span>
-              <span className="text-[8px] font-sans uppercase font-bold tracking-wider text-emerald-800">
+              <span className="text-[8px] font-sans uppercase font-bold tracking-wider text-slate-900">
                 Tersertifikasi Elektronik
               </span>
             </div>
