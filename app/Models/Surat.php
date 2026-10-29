@@ -13,20 +13,23 @@ class Surat extends Model
 
     protected $fillable = [
         'nomor_surat',
-        'jenis_surat_id',
         'warga_id',
-        'dibuat_oleh',
-        'data_surat',
-        'status',
+        'jenis_surat_id',
+        'status', // draft, diajukan, disetujui, ditolak
+        'data_isian',
         'tanggal_pengajuan',
+        'created_by',
+        'created_by_name',
     ];
 
-    protected function casts(): array
+    protected $casts = [
+        'data_isian' => 'array',
+        'tanggal_pengajuan' => 'date',
+    ];
+
+    public function warga()
     {
-        return [
-            'data_surat' => 'array',
-            'tanggal_pengajuan' => 'datetime',
-        ];
+        return $this->belongsTo(Warga::class, 'warga_id');
     }
 
     public function jenisSurat()
@@ -34,48 +37,21 @@ class Surat extends Model
         return $this->belongsTo(JenisSurat::class, 'jenis_surat_id');
     }
 
-    public function warga()
-    {
-        return $this->belongsTo(Warga::class, 'warga_id');
-    }
-
     public function pembuat()
     {
-        return $this->belongsTo(User::class, 'dibuat_oleh');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function validasi()
     {
-        return $this->hasOne(SuratValidasi::class, 'surat_id')->latestOfMany();
+        return $this->hasOne(SuratValidasi::class, 'surat_id');
     }
 
-    public function riwayatValidasi()
+    public static function generateNomorSurat(string $kode): string
     {
-        return $this->hasMany(SuratValidasi::class, 'surat_id');
-    }
-
-    public function isDraft(): bool
-    {
-        return $this->status === 'draft';
-    }
-
-    public function isDiajukan(): bool
-    {
-        return $this->status === 'diajukan';
-    }
-
-    public function isDisetujui(): bool
-    {
-        return $this->status === 'disetujui';
-    }
-
-    public function isDitolak(): bool
-    {
-        return $this->status === 'ditolak';
-    }
-
-    public function scopeMenungguValidasi($query)
-    {
-        return $query->where('status', 'diajukan');
+        $year = date('Y');
+        $count = self::whereYear('created_at', $year)->count() + 1;
+        $padded = str_pad((string)$count, 2, '0', STR_PAD_LEFT);
+        return "470/{$padded}/{$kode}/TS/{$year}";
     }
 }

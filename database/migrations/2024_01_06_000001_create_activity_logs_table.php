@@ -10,16 +10,13 @@ return new class extends Migration
     {
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('aktivitas'); // contoh: "Login", "Tambah Data Warga", "Validasi Surat"
-            $table->text('deskripsi')->nullable();
-            $table->string('subject_type')->nullable(); // model terkait, misal App\Models\Surat
-            $table->unsignedBigInteger('subject_id')->nullable();
-            $table->string('ip_address', 45)->nullable();
-            $table->timestamp('created_at')->useCurrent();
-
-            $table->index(['user_id', 'created_at']);
-            $table->index('created_at');
+            $table->string('user_name');
+            $table->string('user_role');
+            $table->string('aksi');
+            $table->text('deskripsi');
+            $table->string('model_type')->nullable();
+            $table->unsignedBigInteger('model_id')->nullable();
+            $table->timestamps();
         });
     }
 

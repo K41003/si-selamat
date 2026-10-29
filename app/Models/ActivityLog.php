@@ -2,51 +2,34 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ActivityLog extends Model
 {
+    use HasFactory;
+
     protected $table = 'activity_logs';
 
-    public $timestamps = false; // hanya pakai created_at
-
     protected $fillable = [
-        'user_id',
-        'aktivitas',
+        'user_name',
+        'user_role',
+        'aksi',
         'deskripsi',
-        'subject_type',
-        'subject_id',
-        'ip_address',
-        'created_at',
+        'model_type',
+        'model_id',
     ];
 
-    protected function casts(): array
+    public static function log(string $aksi, string $deskripsi, ?string $modelType = null, ?int $modelId = null): self
     {
-        return [
-            'created_at' => 'datetime',
-        ];
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Helper untuk mencatat log aktivitas dari mana saja di aplikasi.
-     *
-     * Contoh: ActivityLog::catat('Validasi Surat', "Menyetujui surat #{$surat->id}", $surat);
-     */
-    public static function catat(string $aktivitas, ?string $deskripsi = null, ?Model $subject = null): self
-    {
+        $user = auth()->user();
         return self::create([
-            'user_id' => auth()->id(),
-            'aktivitas' => $aktivitas,
+            'user_name' => $user ? ($user->active_staff_name ?: $user->name) : 'Sistem',
+            'user_role' => $user ? ($user->role === 'kades' ? 'Kepala Desa' : 'Staff Pelayanan') : 'Sistem',
+            'aksi' => $aksi,
             'deskripsi' => $deskripsi,
-            'subject_type' => $subject ? get_class($subject) : null,
-            'subject_id' => $subject?->id,
-            'ip_address' => request()?->ip(),
-            'created_at' => now(),
+            'model_type' => $modelType,
+            'model_id' => $modelId,
         ]);
     }
 }
