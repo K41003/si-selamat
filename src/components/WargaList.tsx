@@ -4,21 +4,7 @@ import { StorageService } from '../services/storage';
 import { useAuth } from '../context/AuthContext';
 import { maskIdentityNumber } from '../utils';
 import { Warga } from '../types';
-import {
-  Search,
-  Plus,
-  Eye,
-  EyeOff,
-  Edit2,
-  Trash2,
-  AlertTriangle,
-  X,
-  Loader2,
-  ChevronLeft,
-  ChevronRight,
-  FilePlus,
-  Database
-} from 'lucide-react';
+import { Search, Plus, Eye, EyeOff, Edit2, Trash2, AlertTriangle, X, Loader2, Database } from 'lucide-react';
 
 interface WargaListProps {
   onNavigate: (view: string) => void;
@@ -72,7 +58,8 @@ export const WargaList: React.FC<WargaListProps> = ({ onNavigate }) => {
 
   const handleDelete = async () => {
     if (!deleteTarget || !user) return;
-
+    
+    // Call API delete and local storage delete
     const successApi = await ApiService.deleteWarga(deleteTarget.id);
     StorageService.deleteWarga(deleteTarget.id, user.name, user.role);
 
@@ -87,60 +74,56 @@ export const WargaList: React.FC<WargaListProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Toast Alert */}
       {toastMessage && (
         <div
-          className={`flex items-center justify-between rounded-2xl px-5 py-3 text-xs sm:text-sm font-semibold shadow-xs ${
+          className={`flex items-center justify-between rounded-lg px-4 py-3 text-sm font-medium ${
             toastMessage.type === 'success'
-              ? 'bg-slate-900 text-white border border-slate-800'
-              : 'bg-rose-50 text-rose-900 border border-rose-200'
+              ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200'
+              : 'bg-red-50 text-red-800 ring-1 ring-red-200'
           }`}
         >
           <span>{toastMessage.text}</span>
-          <button onClick={() => setToastMessage(null)} className="text-slate-400 hover:text-white p-1">
-            <X className="h-4 w-4 stroke-[1.8]" />
+          <button onClick={() => setToastMessage(null)} className="text-slate-400 hover:text-slate-600">
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
 
-      {/* Title & Primary Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-              Data Kependudukan
-            </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-slate-900">Kelola Data Warga</h1>
             {isFromDatabase && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-[#1E3A8A] bg-[#1E3A8A]/10 border border-[#1E3A8A]/20 px-2.5 py-0.5 rounded-full">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#1E3A8A]"></span>
-                MySQL Live
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-600/20">
+                <Database className="h-3 w-3" />
+                Live MySQL Database
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-500 mt-1">
-            Total {totalCount.toLocaleString('id-ID')} warga terdaftar di Desa Tanjung Selamat
+          <p className="text-sm text-slate-500">
+            Total {totalCount.toLocaleString('id-ID')} warga terdaftar di sistem.
           </p>
         </div>
-
         {user?.role === 'staff' && (
           <button
             id="btn-add-warga"
             onClick={() => onNavigate('warga_create')}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1E3A8A] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#172554] transition shadow-sm active:scale-95 shrink-0"
+            className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition shadow-xs"
           >
-            <Plus className="h-4.5 w-4.5 stroke-[2]" />
-            <span>Tambah Data Warga</span>
+            <Plus className="h-4 w-4" />
+            Tambah Data Warga
           </button>
         )}
       </div>
 
-      {/* Clean White Card Sheet */}
-      <div className="rounded-2xl sm:rounded-3xl bg-white p-5 sm:p-8 shadow-2xs border border-slate-200 space-y-5">
-        {/* Search & Actions Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-lg">
-            <Search className="absolute left-3.5 top-3 h-4.5 w-4.5 text-slate-400 stroke-[1.8]" />
+      {/* Search Bar */}
+      <div className="rounded-xl bg-white p-4 shadow-xs ring-1 ring-slate-200">
+        <div className="flex flex-wrap gap-2">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
               value={search}
@@ -148,194 +131,148 @@ export const WargaList: React.FC<WargaListProps> = ({ onNavigate }) => {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Cari berdasarkan Nama, NIK, atau Dusun..."
-              className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
+              placeholder="Cari nama, NIK, No. KK, atau Dusun..."
+              className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
             />
           </div>
-
-          <div className="flex items-center gap-2 self-end sm:self-auto">
+          {search && (
             <button
-              type="button"
-              onClick={() => setShowFullNik(!showFullNik)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-              title={showFullNik ? "Samarkan NIK (Privasi)" : "Tampilkan NIK Lengkap"}
+              onClick={() => {
+                setSearch('');
+                setCurrentPage(1);
+              }}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:text-slate-800"
             >
-              {showFullNik ? <EyeOff className="h-4 w-4 stroke-[1.8] text-slate-400" /> : <Eye className="h-4 w-4 stroke-[1.8] text-slate-400" />}
-              <span>{showFullNik ? 'Samarkan NIK' : 'Lihat NIK Lengkap'}</span>
+              Reset
             </button>
-
-            {search && (
-              <button
-                onClick={() => {
-                  setSearch('');
-                  setCurrentPage(1);
-                }}
-                className="rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
-              >
-                Reset
-              </button>
-            )}
-          </div>
+          )}
         </div>
+      </div>
 
-        {/* Responsive Data Table */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          <div className="overflow-x-auto relative min-h-[320px]">
-            {loading && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/75 backdrop-blur-xs">
-                <div className="flex items-center gap-3 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-lg border border-slate-200">
-                  <Loader2 className="h-5 w-5 animate-spin text-[#1E3A8A] stroke-[2]" />
-                  <span>Memuat data kependudukan...</span>
-                </div>
+      {/* Data Table */}
+      <div className="overflow-hidden rounded-xl bg-white shadow-xs ring-1 ring-slate-200">
+        <div className="overflow-x-auto relative">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-[1px]">
+              <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-md ring-1 ring-slate-200">
+                <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+                Memuat data warga...
               </div>
-            )}
+            </div>
+          )}
 
-            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-              <thead className="bg-slate-50 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                <tr>
-                  <th className="px-5 py-3.5">NIK Warga</th>
-                  <th className="px-5 py-3.5">Nama Lengkap</th>
-                  <th className="px-5 py-3.5">Tempat &amp; Tgl Lahir</th>
-                  <th className="px-5 py-3.5">Jenis Kelamin</th>
-                  <th className="px-5 py-3.5">Alamat / Dusun</th>
-                  <th className="px-5 py-3.5 text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {wargaList.length > 0 ? (
-                  wargaList.map(w => {
-                    const cleanTgl = w.tanggal_lahir ? w.tanggal_lahir.split(' ')[0] : '-';
-                    return (
-                      <tr key={w.id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="px-5 py-4 font-mono text-xs font-semibold tabular-nums text-slate-900">
-                          {showFullNik ? w.nik : maskIdentityNumber(w.nik)}
-                        </td>
-                        <td className="px-5 py-4 text-sm font-semibold text-slate-900">
-                          {w.nama}
-                        </td>
-                        <td className="px-5 py-4 text-xs text-slate-600 font-medium">
-                          {w.tempat_lahir ? `${w.tempat_lahir}, ` : ''}{cleanTgl}
-                        </td>
-                        <td className="px-5 py-4 text-xs text-slate-600 font-medium">
-                          {w.jenis_kelamin || '-'}
-                        </td>
-                        <td className="px-5 py-4 text-slate-600 text-xs truncate max-w-xs">
-                          {w.alamat || '-'} {w.rt ? `(RT ${w.rt}/RW ${w.rw})` : ''}
-                        </td>
-                        <td className="px-5 py-4 text-right">
-                          <div className="flex justify-end items-center gap-1.5">
-                            {/* Detail Button */}
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-slate-50 text-xs font-semibold text-slate-600 uppercase">
+              <tr>
+                <th className="px-4 py-3 text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span>NIK</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowFullNik(!showFullNik)}
+                      className="inline-flex items-center text-[10px] lowercase px-1.5 py-0.5 rounded bg-slate-200/70 text-slate-700 hover:bg-slate-300 transition"
+                      title={showFullNik ? "Samarkan NIK (Privasi)" : "Tampilkan NIK Lengkap"}
+                    >
+                      {showFullNik ? <EyeOff className="h-3 w-3 mr-0.5" /> : <Eye className="h-3 w-3 mr-0.5" />}
+                      {showFullNik ? 'hide' : 'show'}
+                    </button>
+                  </div>
+                </th>
+                <th className="px-4 py-3 text-left">Nama</th>
+                <th className="px-4 py-3 text-left">Jenis Kelamin</th>
+                <th className="px-4 py-3 text-left">Pekerjaan</th>
+                <th className="px-4 py-3 text-left">Alamat / Dusun</th>
+                <th className="px-4 py-3 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {wargaList.length > 0 ? (
+                wargaList.map(w => (
+                  <tr key={w.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs font-medium text-slate-700">
+                      {showFullNik ? w.nik : maskIdentityNumber(w.nik)}
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-slate-900">{w.nama}</td>
+                    <td className="px-4 py-3 text-slate-600">{w.jenis_kelamin || '-'}</td>
+                    <td className="px-4 py-3 text-slate-600 text-xs">{w.pekerjaan || '-'}</td>
+                    <td className="px-4 py-3 text-slate-600 truncate max-w-xs text-xs">
+                      {w.alamat || '-'} {w.rt ? `(RT ${w.rt}/RW ${w.rw})` : ''}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex justify-end gap-1.5">
+                        <button
+                          onClick={() => onNavigate(`warga_show_${w.id}`)}
+                          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                          title="Detail"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          Detail
+                        </button>
+                        {user?.role === 'staff' && (
+                          <>
                             <button
-                              onClick={() => onNavigate(`warga_show_${w.id}`)}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:border-[#1E3A8A] hover:text-[#1E3A8A] transition"
-                              title="Lihat Detail Data Warga"
+                              onClick={() => onNavigate(`warga_edit_${w.id}`)}
+                              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                              title="Update"
                             >
-                              <Eye className="h-3.5 w-3.5 stroke-[1.8] text-slate-400" />
-                              <span>Detail</span>
+                              <Edit2 className="h-3.5 w-3.5" />
+                              Update
                             </button>
-
-                            {/* Buat Surat Button for this citizen */}
-                            {user?.role === 'staff' && (
-                              <button
-                                onClick={() => onNavigate(`surat_create_for_${w.id}`)}
-                                className="inline-flex items-center gap-1 rounded-lg border border-[#1E3A8A]/20 bg-[#1E3A8A]/10 px-3 py-1.5 text-xs font-semibold text-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white transition"
-                                title="Buat Permohonan Surat untuk Warga ini"
-                              >
-                                <FilePlus className="h-3.5 w-3.5 stroke-[1.8] text-slate-400" />
-                                <span className="hidden sm:inline">Surat</span>
-                              </button>
-                            )}
-
-                            {/* Edit Button */}
-                            {user?.role === 'staff' && (
-                              <button
-                                onClick={() => onNavigate(`warga_edit_${w.id}`)}
-                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                                title="Ubah Data Warga"
-                              >
-                                <Edit2 className="h-3.5 w-3.5 stroke-[1.8] text-slate-400" />
-                                <span>Edit</span>
-                              </button>
-                            )}
-
-                            {/* Delete Button */}
-                            {user?.role === 'staff' && (
-                              <button
-                                onClick={() => setDeleteTarget(w)}
-                                className="inline-flex items-center p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
-                                title="Hapus Data Warga"
-                              >
-                                <Trash2 className="h-4 w-4 stroke-[1.8]" />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-5 py-14 text-center text-sm text-slate-400">
-                      {loading
-                        ? 'Sedang mencari data di database...'
-                        : search
-                        ? `Tidak ada data warga dengan kata kunci "${search}".`
-                        : 'Belum ada data warga terdaftar.'}
+                            <button
+                              onClick={() => setDeleteTarget(w)}
+                              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                              title="Hapus"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Hapus
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-400">
+                    {loading
+                      ? 'Sedang memuat data dari database...'
+                      : search
+                      ? `Tidak ada data warga yang cocok dengan pencarian "${search}".`
+                      : 'Belum ada data warga terdaftar.'}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* Numbered Pagination with clean Navy Blue styling */}
+        {/* Smart Pagination */}
         {totalCount > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-            <span className="text-xs text-slate-500 font-medium">
-              Menampilkan {((currentPage - 1) * itemsPerPage) + 1} &ndash;{' '}
-              {Math.min(currentPage * itemsPerPage, totalCount)} dari{' '}
-              {totalCount.toLocaleString('id-ID')} warga
+          <div className="flex flex-wrap items-center justify-between border-t border-slate-200 px-4 py-3 text-xs text-slate-500 gap-2">
+            <span>
+              Menampilkan {((currentPage - 1) * itemsPerPage) + 1} -{' '}
+              {Math.min(currentPage * itemsPerPage, totalCount)} dari {totalCount.toLocaleString('id-ID')} warga
             </span>
-
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <button
                 disabled={currentPage <= 1 || loading}
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-40 transition"
-                aria-label="Halaman Sebelumnya"
+                className="rounded border border-slate-200 px-2.5 py-1 disabled:opacity-40 hover:bg-slate-50 font-medium"
               >
-                <ChevronLeft className="h-4 w-4 stroke-[1.8]" />
+                Sebelumnya
               </button>
-
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let pageNumber = i + 1;
-                if (totalPages > 5 && currentPage > 3) {
-                  pageNumber = currentPage - 2 + i;
-                  if (pageNumber > totalPages) pageNumber = totalPages - (4 - i);
-                }
-                return (
-                  <button
-                    key={pageNumber}
-                    onClick={() => setCurrentPage(pageNumber)}
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition ${
-                      currentPage === pageNumber
-                        ? 'border border-[#1E3A8A] bg-[#1E3A8A] text-white font-bold'
-                        : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    {pageNumber}
-                  </button>
-                );
-              })}
+              
+              <span className="px-2 py-1 font-semibold text-slate-700">
+                Halaman {currentPage} dari {totalPages}
+              </span>
 
               <button
                 disabled={currentPage >= totalPages || loading}
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-40 transition"
-                aria-label="Halaman Berikutnya"
+                className="rounded border border-slate-200 px-2.5 py-1 disabled:opacity-40 hover:bg-slate-50 font-medium"
               >
-                <ChevronRight className="h-4 w-4 stroke-[1.8]" />
+                Berikutnya
               </button>
             </div>
           </div>
@@ -344,22 +281,22 @@ export const WargaList: React.FC<WargaListProps> = ({ onNavigate }) => {
 
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs px-4">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 sm:p-8 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-rose-600">
-              <div className="rounded-2xl bg-rose-50 p-3">
-                <AlertTriangle className="h-6 w-6 stroke-[1.8]" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs px-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl ring-1 ring-slate-200">
+            <div className="flex items-center gap-3 text-red-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50">
+                <AlertTriangle className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900">Hapus Data Warga?</h3>
+              <h3 className="text-base font-semibold text-slate-900">Hapus Data Warga?</h3>
             </div>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Data <strong className="text-slate-900">{deleteTarget.nama}</strong> (NIK: <span className="font-mono text-slate-900">{deleteTarget.nik}</span>) akan dihapus permanen dari basis data. Tindakan ini tidak dapat dibatalkan.
+            <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+              Data <strong className="text-slate-900">{deleteTarget.nama}</strong> (NIK: <span className="font-mono">{deleteTarget.nik}</span>) akan dihapus permanen dari database. Tindakan ini tidak dapat dibatalkan.
             </p>
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+            <div className="mt-6 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Batal
               </button>
@@ -367,7 +304,7 @@ export const WargaList: React.FC<WargaListProps> = ({ onNavigate }) => {
                 id="btn-confirm-delete-warga"
                 type="button"
                 onClick={handleDelete}
-                className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 transition shadow-xs"
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition"
               >
                 Ya, Hapus
               </button>

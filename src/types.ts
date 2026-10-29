@@ -62,7 +62,6 @@ export interface Surat {
   id: number;
   nomor_surat: string;
   warga_id: number;
-  warga?: Warga; // Snapshot data warga pemohon saat surat dibuat/diajukan
   jenis_surat_id: number;
   status: SuratStatus;
   data_isian: Record<string, string>;
