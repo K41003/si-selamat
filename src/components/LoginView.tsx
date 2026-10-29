@@ -170,35 +170,69 @@ export const LoginView: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
+    <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-4 py-8 sm:py-12">
       <div className="w-full max-w-md">
+        {/* Brand Header */}
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md">
-            <Shield className="h-7 w-7 text-emerald-400" />
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1E3A8A] text-white shadow-sm">
+            <span className="text-xl font-extrabold tracking-tight">TS</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">SI SELAMAT</h1>
-          <p className="mt-1 text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-            Sistem Informasi Surat Elektronik &amp; Administrasi Desa Tanjung Selamat
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">SI-SELAMAT</h1>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Desa Tanjung Selamat &bull; Deli Serdang
           </p>
         </div>
 
-        <div className="rounded-2xl bg-white p-7 shadow-sm ring-1 ring-slate-200">
+        {/* Main Card Sheet */}
+        <div className="rounded-2xl sm:rounded-3xl bg-white p-6 sm:p-8 border border-slate-200 shadow-2xs">
           {!showForgotPassword ? (
             <>
-              <div className="mb-5 border-b border-slate-100 pb-3">
-                <h2 className="text-base font-bold text-slate-900">Masuk Akun Pengguna</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Masukkan username dan password resmi Anda untuk mengakses sistem.
+              <div className="mb-5 pb-3 border-b border-slate-100">
+                <h2 className="text-lg font-bold text-slate-900">Masuk ke Sistem</h2>
+              </div>
+
+              {/* Quick One-Click Demo Role Buttons */}
+              <div className="mb-5 rounded-2xl bg-slate-50 p-3.5 border border-slate-200">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                  Akses Cepat Pengguna (Demo):
                 </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUsername('staff');
+                      setPassword('password');
+                      setStaffName('Amanda Rahmawati');
+                      setError(null);
+                    }}
+                    className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#1E3A8A] hover:bg-[#1E3A8A]/5 text-slate-900 transition font-medium text-xs text-center shadow-2xs"
+                  >
+                    <span className="font-semibold text-xs text-slate-900">Staff Pelayanan</span>
+                    <span className="text-[11px] text-slate-500 mt-0.5">Amanda Rahmawati</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUsername('kades');
+                      setPassword('password');
+                      setError(null);
+                    }}
+                    className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#1E3A8A] hover:bg-[#1E3A8A]/5 text-slate-900 transition font-medium text-xs text-center shadow-2xs"
+                  >
+                    <span className="font-semibold text-xs text-slate-900">Kepala Desa</span>
+                    <span className="text-[11px] text-slate-500 mt-0.5">H. Ahmad Fauzi</span>
+                  </button>
+                </div>
               </div>
 
               {error && (
                 <div
                   id="login-error-alert"
                   data-testid="login-error-alert"
-                  className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-xs font-medium text-red-700 ring-1 ring-red-200"
+                  className="mb-4 flex items-center gap-2.5 rounded-lg bg-rose-50 p-3 text-xs font-medium text-rose-800 border border-rose-200"
                 >
-                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
                   <span>{error}</span>
                 </div>
               )}
@@ -218,21 +252,18 @@ export const LoginView: React.FC = () => {
                       setError(null);
                     }}
                     required
-                    placeholder="Masukkan username (contoh: staff / kades)"
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-800 transition"
+                    placeholder="staff atau kades"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
                   />
                 </div>
 
                 {/* Inisialisasi Nama Petugas Khusus Akun Staff */}
                 {isStaffAccount && (
-                  <div className="rounded-xl bg-emerald-50/80 p-3.5 ring-1 ring-emerald-200" data-testid="section-staff-shift">
-                    <label htmlFor="staff-name" className="mb-1 flex items-center gap-1.5 text-xs font-bold text-emerald-950">
-                      <UserCheck className="h-4 w-4 text-emerald-700" />
-                      Inisialisasi Petugas Shift Hari Ini
+                  <div className="rounded-2xl bg-slate-50 p-3.5 border border-slate-200" data-testid="section-staff-shift">
+                    <label htmlFor="staff-name" className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-slate-900">
+                      <UserCheck className="h-4 w-4 text-slate-400 stroke-[1.8]" />
+                      <span>Nama Petugas Shift</span>
                     </label>
-                    <p className="text-[11px] text-emerald-800 mb-2 leading-relaxed">
-                      Sebutkan nama staff yang sedang bertugas (misal: <strong>Amanda</strong>) agar tercatat rapi pada Log Aktivitas Kades.
-                    </p>
                     <input
                       type="text"
                       id="staff-name"
@@ -240,8 +271,8 @@ export const LoginView: React.FC = () => {
                       value={staffName}
                       onChange={e => setStaffName(e.target.value)}
                       required
-                      placeholder="Contoh: Amanda Rahmawati / Budi / Siti"
-                      className="w-full rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                      placeholder="Contoh: Amanda Rahmawati"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
                     />
                   </div>
                 )}
@@ -261,7 +292,7 @@ export const LoginView: React.FC = () => {
                         setForgotSuccess(null);
                         setResetEmail(username === 'kades' ? 'kades@tanjungselamat.desa.id' : 'staff@tanjungselamat.desa.id');
                       }}
-                      className="text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                      className="text-[11px] font-medium text-[#1E3A8A] hover:text-[#172554] hover:underline"
                     >
                       Lupa Password?
                     </button>
@@ -277,16 +308,16 @@ export const LoginView: React.FC = () => {
                         setError(null);
                       }}
                       required
-                      placeholder="Masukkan password"
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm focus:border-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-800 transition"
+                      placeholder="Masukkan kata sandi"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 pr-10 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
                     />
                     <button
                       type="button"
                       data-testid="btn-toggle-password"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600"
+                      className="absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-400 hover:text-slate-700"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-4 w-4 stroke-[1.8]" /> : <Eye className="h-4 w-4 stroke-[1.8]" />}
                     </button>
                   </div>
                 </div>
@@ -295,9 +326,9 @@ export const LoginView: React.FC = () => {
                   id="btn-submit-login"
                   data-testid="btn-login-submit"
                   type="submit"
-                  className="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 shadow-xs mt-2"
+                  className="w-full rounded-xl bg-[#1E3A8A] hover:bg-[#172554] py-2.5 sm:py-3 text-sm font-semibold text-white transition active:scale-95 shadow-sm mt-2"
                 >
-                  Masuk ke Aplikasi
+                  Masuk ke Aplikasi &rarr;
                 </button>
               </form>
             </>
@@ -327,8 +358,8 @@ export const LoginView: React.FC = () => {
               )}
 
               {forgotSuccess && (
-                <div className="mb-4 flex items-start gap-2 rounded-lg bg-emerald-50 p-3 text-xs font-medium text-emerald-800 ring-1 ring-emerald-200">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
+                <div className="mb-4 flex items-start gap-2 rounded-lg bg-slate-900 p-3 text-xs font-medium text-white border border-slate-800">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-sky-400" />
                   <span>{forgotSuccess}</span>
                 </div>
               )}
@@ -349,19 +380,16 @@ export const LoginView: React.FC = () => {
                         onChange={e => setResetEmail(e.target.value)}
                         required
                         placeholder="contoh: staff@tanjungselamat.desa.id"
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 pl-9 text-sm focus:border-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-800"
+                        className="w-full rounded-xl border border-slate-200 px-3.5 py-2 pl-9 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
                       />
                       <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                     </div>
-                    <p className="mt-1.5 text-[11px] text-slate-500">
-                      Sistem akan mengirimkan 6 digit kode OTP verifikasi ke inbox email Anda.
-                    </p>
                   </div>
 
                   <button
                     type="submit"
                     data-testid="btn-send-otp"
-                    className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-xs"
+                    className="w-full rounded-xl bg-[#1E3A8A] hover:bg-[#172554] py-2.5 text-xs sm:text-sm font-semibold text-white transition active:scale-95 shadow-sm"
                   >
                     Kirim Kode Verifikasi Email
                   </button>
@@ -372,16 +400,16 @@ export const LoginView: React.FC = () => {
               {forgotStep === 2 && (
                 <form onSubmit={handleVerifyCode} className="space-y-4" data-testid="form-forgot-step-2">
                   {/* Simulated Email Notification Banner */}
-                  <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-3.5 text-xs text-blue-900">
+                  <div className="rounded-xl border border-[#1E3A8A]/30 bg-[#1E3A8A]/10 p-3.5 text-xs text-slate-900">
                     <div className="flex items-center gap-1.5 font-bold mb-1">
-                      <Mail className="h-4 w-4 text-blue-600" />
+                      <Mail className="h-4 w-4 text-slate-400" />
                       <span>Notifikasi Email Simulasi:</span>
                     </div>
-                    <p className="text-[11px] text-blue-800">
+                    <p className="text-[11px] text-slate-700">
                       Subjek: <strong>Kode Verifikasi Reset Password Desa</strong>
                     </p>
-                    <p className="mt-1 text-[11px] text-blue-800">
-                      Kode OTP Anda adalah: <strong data-testid="text-simulated-otp" className="font-mono text-sm tracking-widest text-blue-950 bg-white px-2 py-0.5 rounded border border-blue-200">{simulatedSentCode}</strong>
+                    <p className="mt-1 text-[11px] text-slate-700">
+                      Kode OTP Anda adalah: <strong data-testid="text-simulated-otp" className="font-mono text-sm tracking-widest text-slate-900 bg-white px-2 py-0.5 rounded border border-[#1E3A8A]/30">{simulatedSentCode}</strong>
                     </p>
                   </div>
 
@@ -398,14 +426,14 @@ export const LoginView: React.FC = () => {
                       onChange={e => setVerificationCode(e.target.value.replace(/\D/g, ''))}
                       required
                       placeholder="Contoh: 123456"
-                      className="w-full text-center tracking-widest font-mono font-bold text-lg rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                      className="w-full text-center tracking-widest font-mono font-bold text-lg rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
                     />
                   </div>
 
                   <button
                     type="submit"
                     data-testid="btn-verify-otp"
-                    className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-xs"
+                    className="w-full rounded-xl bg-[#1E3A8A] hover:bg-[#172554] py-2.5 text-xs sm:text-sm font-semibold text-white transition active:scale-95 shadow-sm"
                   >
                     Verifikasi Kode
                   </button>
@@ -438,7 +466,7 @@ export const LoginView: React.FC = () => {
                         onChange={e => setNewPassword(e.target.value)}
                         required
                         placeholder="Minimal 5 karakter"
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                        className="w-full rounded-xl border border-slate-200 px-3 py-2 pr-10 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
                       />
                       <button
                         type="button"
@@ -462,14 +490,14 @@ export const LoginView: React.FC = () => {
                       onChange={e => setConfirmPassword(e.target.value)}
                       required
                       placeholder="Ketik ulang password baru"
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
                     />
                   </div>
 
                   <button
                     type="submit"
                     data-testid="btn-save-new-password"
-                    className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-xs"
+                    className="w-full rounded-xl bg-[#1E3A8A] hover:bg-[#172554] py-2.5 text-xs sm:text-sm font-semibold text-white transition active:scale-95 shadow-sm"
                   >
                     Simpan Password Baru &amp; Masuk
                   </button>

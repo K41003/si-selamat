@@ -119,26 +119,22 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => onNavigate('warga')}
-            className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 transition"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              {isEdit ? 'Update Data Warga' : 'Tambah Data Warga'}
-            </h1>
-            <p className="text-sm text-slate-500">
-              {isEdit ? 'Perbarui informasi data kependudukan warga.' : 'Masukkan data identitas kependudukan warga desa.'}
-            </p>
-          </div>
+      <div className="flex items-center gap-3.5">
+        <button
+          onClick={() => onNavigate('warga')}
+          className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition shadow-2xs"
+          title="Kembali ke Daftar Warga"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {isEdit ? 'Ubah Data Warga' : 'Tambah Data Warga Baru'}
+          </h1>
         </div>
       </div>
 
-      <div className="rounded-xl bg-white p-6 shadow-xs ring-1 ring-slate-200">
+      <div className="rounded-2xl sm:rounded-3xl bg-white p-6 sm:p-9 shadow-2xs border border-slate-200">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
@@ -153,15 +149,15 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                 value={formData.nik}
                 onChange={e => setFormData({ ...formData, nik: e.target.value.replace(/\D/g, '') })}
                 placeholder="16 digit NIK"
-                className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
-                  errors.nik ? 'border-red-400 focus:ring-red-400 bg-red-50/30' : 'border-slate-300 focus:ring-slate-500'
+                className={`w-full rounded-xl border px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none transition ${
+                  errors.nik ? 'border-red-400 focus:ring-2 focus:ring-red-400/20 bg-red-50/30' : 'border-slate-200 focus:border-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]/20'
                 }`}
               />
               {errors.nik && <p data-testid="error-warga-nik" className="mt-1 text-xs text-red-600">{errors.nik}</p>}
             </div>
 
             <div>
-              <label htmlFor="no_kk" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="no_kk" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Nomor Kartu Keluarga (KK)
               </label>
               <input
@@ -172,15 +168,15 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                 value={formData.no_kk}
                 onChange={e => setFormData({ ...formData, no_kk: e.target.value.replace(/\D/g, '') })}
                 placeholder="16 digit Nomor KK"
-                className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
-                  errors.no_kk ? 'border-red-400 focus:ring-red-400' : 'border-slate-300 focus:ring-slate-500'
+                className={`w-full rounded-xl border px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none transition ${
+                  errors.no_kk ? 'border-red-400 focus:ring-2 focus:ring-red-400/20' : 'border-slate-200 focus:border-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]/20'
                 }`}
               />
               {errors.no_kk && <p data-testid="error-warga-kk" className="mt-1 text-xs text-red-600">{errors.no_kk}</p>}
             </div>
 
             <div className="sm:col-span-2">
-              <label htmlFor="nama" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="nama" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Nama Lengkap <span className="text-red-500">*</span>
               </label>
               <input
@@ -190,15 +186,15 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                 value={formData.nama}
                 onChange={e => setFormData({ ...formData, nama: e.target.value })}
                 placeholder="Nama lengkap sesuai KTP"
-                className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
-                  errors.nama ? 'border-red-400 focus:ring-red-400' : 'border-slate-300 focus:ring-slate-500'
+                className={`w-full rounded-xl border px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none transition ${
+                  errors.nama ? 'border-red-400 focus:ring-2 focus:ring-red-400/20' : 'border-slate-200 focus:border-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]/20'
                 }`}
               />
               {errors.nama && <p data-testid="error-warga-nama" className="mt-1 text-xs text-red-600">{errors.nama}</p>}
             </div>
 
             <div>
-              <label htmlFor="tempat_lahir" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="tempat_lahir" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Tempat Lahir
               </label>
               <input
@@ -207,12 +203,12 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                 value={formData.tempat_lahir}
                 onChange={e => setFormData({ ...formData, tempat_lahir: e.target.value })}
                 placeholder="Kota / Kabupaten"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
               />
             </div>
 
             <div>
-              <label htmlFor="tanggal_lahir" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="tanggal_lahir" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Tanggal Lahir
               </label>
               <input
@@ -220,19 +216,19 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                 id="tanggal_lahir"
                 value={formData.tanggal_lahir}
                 onChange={e => setFormData({ ...formData, tanggal_lahir: e.target.value })}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
               />
             </div>
 
             <div>
-              <label htmlFor="jenis_kelamin" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="jenis_kelamin" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Jenis Kelamin
               </label>
               <select
                 id="jenis_kelamin"
                 value={formData.jenis_kelamin}
                 onChange={e => setFormData({ ...formData, jenis_kelamin: e.target.value as any })}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
               >
                 <option value="Laki-laki">Laki-laki</option>
                 <option value="Perempuan">Perempuan</option>
@@ -240,7 +236,7 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
             </div>
 
             <div>
-              <label htmlFor="agama" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="agama" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Agama
               </label>
               <input
@@ -249,12 +245,12 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                 value={formData.agama}
                 onChange={e => setFormData({ ...formData, agama: e.target.value })}
                 placeholder="Islam, Kristen, dll."
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
               />
             </div>
 
             <div>
-              <label htmlFor="pekerjaan" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="pekerjaan" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Pekerjaan
               </label>
               <input
@@ -263,19 +259,19 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                 value={formData.pekerjaan}
                 onChange={e => setFormData({ ...formData, pekerjaan: e.target.value })}
                 placeholder="Wiraswasta, Petani, Guru, dll."
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
               />
             </div>
 
             <div>
-              <label htmlFor="status_perkawinan" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="status_perkawinan" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Status Perkawinan
               </label>
               <select
                 id="status_perkawinan"
                 value={formData.status_perkawinan}
                 onChange={e => setFormData({ ...formData, status_perkawinan: e.target.value as any })}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
               >
                 <option value="Belum Kawin">Belum Kawin</option>
                 <option value="Kawin">Kawin</option>
@@ -285,7 +281,7 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
             </div>
 
             <div>
-              <label htmlFor="no_hp" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="no_hp" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Nomor HP / WhatsApp
               </label>
               <input
@@ -294,13 +290,13 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                 value={formData.no_hp}
                 onChange={e => setFormData({ ...formData, no_hp: e.target.value })}
                 placeholder="08..."
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="rt" className="mb-1 block text-sm font-medium text-slate-700">
+                <label htmlFor="rt" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                   RT
                 </label>
                 <input
@@ -310,11 +306,11 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                   value={formData.rt}
                   onChange={e => setFormData({ ...formData, rt: e.target.value })}
                   placeholder="01"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
                 />
               </div>
               <div>
-                <label htmlFor="rw" className="mb-1 block text-sm font-medium text-slate-700">
+                <label htmlFor="rw" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                   RW
                 </label>
                 <input
@@ -324,13 +320,13 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                   value={formData.rw}
                   onChange={e => setFormData({ ...formData, rw: e.target.value })}
                   placeholder="02"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
                 />
               </div>
             </div>
 
             <div className="sm:col-span-2">
-              <label htmlFor="alamat" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="alamat" className="mb-1 block text-xs sm:text-sm font-semibold text-slate-700">
                 Alamat Lengkap (Dusun / Jalan)
               </label>
               <textarea
@@ -339,16 +335,16 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
                 value={formData.alamat}
                 onChange={e => setFormData({ ...formData, alamat: e.target.value })}
                 placeholder="Dusun I, Jl. Flamboyan No. 12"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-5">
+          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-100 pt-6">
             <button
               type="button"
               onClick={() => onNavigate('warga')}
-              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
             >
               Batal
             </button>
@@ -356,10 +352,10 @@ export const WargaForm: React.FC<WargaFormProps> = ({ wargaId, onNavigate }) => 
               id="btn-save-warga"
               data-testid="btn-save-warga"
               type="submit"
-              className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition shadow-xs"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] hover:bg-[#172554] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition active:scale-95 shadow-sm"
             >
-              <Save className="h-4 w-4" />
-              {isEdit ? 'Simpan Perubahan' : 'Simpan Data Warga'}
+              <Save className="h-4 w-4 stroke-[2]" />
+              <span>{isEdit ? 'Simpan Perubahan' : 'Simpan Data Warga'}</span>
             </button>
           </div>
         </form>
