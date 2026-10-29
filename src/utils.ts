@@ -94,36 +94,3 @@ export function maskIdentityNumber(val?: string): string {
   const maskedLength = Math.max(2, clean.length - 10);
   return `${prefix}${'*'.repeat(maskedLength)}${suffix}`;
 }
-
-// 4. Format Tanggal Lahir (Hanya tanggal, tanpa waktu/jam)
-export function formatTanggalLahir(val?: string | null): string {
-  if (!val) return '-';
-  const trimmed = val.trim();
-  if (!trimmed || trimmed === '-') return '-';
-
-  // Hilangkan bagian waktu jika ada (T00:00:00 atau jam 00:00:00)
-  const dateOnly = trimmed.includes('T') 
-    ? trimmed.split('T')[0] 
-    : trimmed.split(' ')[0];
-
-  // Jika format YYYY-MM-DD, ubah ke DD-MM-YYYY
-  const parts = dateOnly.split('-');
-  if (parts.length === 3 && parts[0].length === 4) {
-    const [year, month, day] = parts;
-    return `${day}-${month}-${year}`;
-  }
-
-  return dateOnly;
-}
-
-// 5. Format Tempat & Tanggal Lahir (Hanya Tempat dan Tanggal)
-export function formatTempatTanggalLahir(tempat?: string | null, tanggal?: string | null): string {
-  const t = tempat?.trim() || '-';
-  const d = formatTanggalLahir(tanggal);
-
-  if (t === '-' && d === '-') return '-';
-  if (t === '-') return d;
-  if (d === '-') return t;
-
-  return `${t}, ${d}`;
-}

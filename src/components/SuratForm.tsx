@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { StorageService } from '../services/storage';
 import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { formatTempatTanggalLahir } from '../utils';
 import { Warga } from '../types';
 import {
   Save,
@@ -10,8 +9,7 @@ import {
   X,
   AlertCircle,
   CheckCircle2,
-  Check,
-  ChevronDown
+  Check
 } from 'lucide-react';
 
 interface SuratFormProps {
@@ -36,9 +34,7 @@ export const SuratForm: React.FC<SuratFormProps> = ({
     return suratId ? StorageService.getSuratList().find(s => s.id === suratId) : undefined;
   }, [suratId]);
 
-  const [selectedJenisId, setSelectedJenisId] = useState<number>(() => {
-    return existingSurat ? existingSurat.jenis_surat_id : (initialJenisId || jenisList[0]?.id || 1);
-  });
+  const selectedJenisId = existingSurat ? existingSurat.jenis_surat_id : (initialJenisId || jenisList[0]?.id || 1);
 
   const [nikInput, setNikInput] = useState<string>(() => {
     if (existingSurat) {
@@ -202,39 +198,11 @@ export const SuratForm: React.FC<SuratFormProps> = ({
 
       {/* Alert Success Box */}
       {successMessage && (
-        <div className="flex items-center gap-3 rounded-lg bg-slate-900 p-3 text-xs font-semibold text-white border border-slate-800">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-sky-400" />
+        <div className="flex items-center gap-3 rounded-xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-900 ring-1 ring-emerald-300">
+          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
           <span>{successMessage}</span>
         </div>
       )}
-
-      {/* Pilihan Jenis Surat Dropdown Selector */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
-        <div>
-          <label htmlFor="select-jenis-surat-form" className="text-xs font-bold text-slate-900 block">
-            Pilihan Jenis Surat:
-          </label>
-          <p className="text-[11px] text-slate-500 mt-0.5">Format dokumen resmi yang akan diterbitkan</p>
-        </div>
-        <div className="relative w-full sm:w-80">
-          <select
-            id="select-jenis-surat-form"
-            data-testid="select-jenis-surat-form"
-            value={selectedJenisId}
-            onChange={e => setSelectedJenisId(Number(e.target.value))}
-            className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 pr-9 text-xs sm:text-sm font-semibold text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 transition cursor-pointer shadow-2xs"
-          >
-            {jenisList.map(j => (
-              <option key={j.id} value={j.id}>
-                [{j.kode}] &mdash; {j.nama_jenis}
-              </option>
-            ))}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-            <ChevronDown className="h-4 w-4 stroke-[2]" />
-          </div>
-        </div>
-      </div>
 
       {/* TEMPLATE SURAT RESMI LANGSUNG (A4 PAPER) */}
       <div className="rounded-2xl bg-white p-8 sm:p-14 shadow-lg ring-1 ring-slate-200 text-slate-900 space-y-6">
@@ -293,17 +261,17 @@ export const SuratForm: React.FC<SuratFormProps> = ({
                     setErrorMessage(null);
                   }}
                   placeholder="Ketik 16 digit NIK..."
-                  className={`w-full rounded-xl border px-3 py-2 font-mono text-xs sm:text-sm font-bold tracking-wider focus:outline-none transition ${
+                  className={`w-full rounded-lg border px-3 py-1.5 font-mono text-sm font-bold tracking-wider focus:outline-none transition ${
                     selectedWarga
-                      ? 'border-[#1E3A8A] bg-[#1E3A8A]/5 text-slate-900'
+                      ? 'border-emerald-500 bg-emerald-50/40 text-emerald-950'
                       : nikInput.length >= 16
                       ? 'border-amber-400 bg-amber-50/40'
-                      : 'border-slate-200 focus:border-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]/20 bg-white'
+                      : 'border-slate-300 focus:border-slate-800 bg-white'
                   }`}
                   autoFocus
                 />
                 {selectedWarga && (
-                  <div data-testid="badge-autofill-success" className="absolute right-2.5 top-2 flex items-center gap-1 text-[11px] font-bold text-slate-900">
+                  <div data-testid="badge-autofill-success" className="absolute right-2.5 top-2 flex items-center gap-1 text-[11px] font-bold text-emerald-700">
                     <Check className="h-3.5 w-3.5 stroke-[3]" /> Terisi Otomatis
                   </div>
                 )}
@@ -334,7 +302,7 @@ export const SuratForm: React.FC<SuratFormProps> = ({
               <input
                 type="text"
                 readOnly
-                value={selectedWarga ? formatTempatTanggalLahir(selectedWarga.tempat_lahir, selectedWarga.tanggal_lahir) : ''}
+                value={selectedWarga ? `${selectedWarga.tempat_lahir || '-'}, ${selectedWarga.tanggal_lahir || '-'}` : ''}
                 placeholder="[Otomatis terisi setelah NIK diinput]"
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-800 focus:outline-none cursor-default"
               />
@@ -423,14 +391,14 @@ export const SuratForm: React.FC<SuratFormProps> = ({
                       value={val}
                       onChange={e => handleFieldChange(field.key, e.target.value)}
                       placeholder={`Ketik ${field.label.toLowerCase()}...`}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-800"
                     />
                   ) : field.type === 'date' ? (
                     <input
                       type="date"
                       value={val}
                       onChange={e => handleFieldChange(field.key, e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm focus:border-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-800"
                     />
                   ) : field.type === 'number' ? (
                     <input
@@ -438,7 +406,7 @@ export const SuratForm: React.FC<SuratFormProps> = ({
                       value={val}
                       onChange={e => handleFieldChange(field.key, e.target.value)}
                       placeholder={`Masukkan ${field.label.toLowerCase()}...`}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm focus:border-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-800"
                     />
                   ) : (
                     <input
@@ -446,7 +414,7 @@ export const SuratForm: React.FC<SuratFormProps> = ({
                       value={val}
                       onChange={e => handleFieldChange(field.key, e.target.value)}
                       placeholder={`Ketik ${field.label.toLowerCase()}...`}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm focus:border-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-800"
                     />
                   )}
                 </div>
@@ -480,30 +448,30 @@ export const SuratForm: React.FC<SuratFormProps> = ({
         </div>
       </div>
 
-      {/* ACTION BAR: BATAL, SIMPAN DRAFT, AJUKAN KE KADES */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xs">
+      {/* HANYA 3 BUTTON: BATAL, SIMPAN DRAFT, AJUKAN SURAT */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl ring-1 ring-slate-200 shadow-xs">
         {/* Button 1: Batal */}
         <button
           type="button"
           id="btn-surat-batal"
           onClick={() => onNavigate('surat')}
-          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition active:scale-95 shadow-2xs"
+          className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs"
         >
-          <X className="h-4 w-4 text-slate-400 stroke-[1.8]" />
+          <X className="h-4 w-4 text-slate-500" />
           <span>Batal</span>
         </button>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
           {/* Button 2: Simpan Draft */}
           <button
             type="button"
             id="btn-surat-draft"
             data-testid="btn-surat-draft"
             onClick={() => handleSave('draft')}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 hover:bg-slate-50 transition active:scale-95 shadow-2xs"
+            className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs"
           >
-            <Save className="h-4 w-4 text-slate-400 stroke-[1.8]" />
-            <span>Simpan Sebagai Draft</span>
+            <Save className="h-4 w-4 text-slate-600" />
+            <span>Simpan Draft</span>
           </button>
 
           {/* Button 3: Ajukan Surat */}
@@ -512,10 +480,10 @@ export const SuratForm: React.FC<SuratFormProps> = ({
             id="btn-surat-ajukan"
             data-testid="btn-surat-ajukan"
             onClick={() => handleSave('diajukan')}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#172554] transition active:scale-95 shadow-sm"
+            className="flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white hover:bg-slate-800 transition shadow-md"
           >
-            <Send className="h-4 w-4 stroke-[1.8]" />
-            <span>Ajukan ke Kepala Desa</span>
+            <Send className="h-4 w-4 text-emerald-400" />
+            <span>Ajukan Surat</span>
           </button>
         </div>
       </div>

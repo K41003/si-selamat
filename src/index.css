@@ -1,35 +1,8 @@
 @import "tailwindcss";
 
-@theme {
-  --color-accent: #1E3A8A;
-  --color-accent-hover: #172554;
-  --color-accent-light: #eff4fb;
-  --color-accent-dark: #1E3A8A;
-}
-
 @layer base {
-  html {
-    font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    color: #0f172a;
-    background-color: #ffffff;
-    -webkit-font-smoothing: antialiased;
-  }
   * {
     border-color: #e2e8f0;
-  }
-  /* Tabular figures for numbers, NIKs, and dates to ensure digit-to-digit alignment */
-  .tabular-nums, .font-mono, td, th {
-    font-variant-numeric: tabular-nums;
-  }
-  /* Accessible focus states in Accent Navy Blue #1E3A8A */
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #1E3A8A !important;
-    box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2) !important;
-  }
-  button:focus-visible {
-    outline: 2px solid #1E3A8A;
-    outline-offset: 2px;
   }
 }
 

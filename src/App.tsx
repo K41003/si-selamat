@@ -17,16 +17,7 @@ import { ActivityLogView } from './components/ActivityLogView';
 export function App() {
   const { user } = useAuth();
   const [currentView, setCurrentView] = useState('dashboard');
-  const [sidebarOpenMobile, setSidebarOpenMobile] = useState(false);
-  const [sidebarCollapsedDesktop, setSidebarCollapsedDesktop] = useState(false);
-
-  const handleToggleSidebar = () => {
-    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-      setSidebarCollapsedDesktop(prev => !prev);
-    } else {
-      setSidebarOpenMobile(prev => !prev);
-    }
-  };
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!user) {
     return <LoginView />;
@@ -112,25 +103,17 @@ export function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] font-sans text-slate-900">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar
         currentView={currentView}
-        onNavigate={(view) => {
-          setCurrentView(view);
-          setSidebarOpenMobile(false);
-        }}
-        isOpenMobile={sidebarOpenMobile}
-        onCloseMobile={() => setSidebarOpenMobile(false)}
-        isCollapsedDesktop={sidebarCollapsedDesktop}
-        onToggleDesktop={() => setSidebarCollapsedDesktop(prev => !prev)}
+        onNavigate={setCurrentView}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex flex-1 flex-col min-w-0 transition-all duration-200">
-        <Header
-          onToggleSidebar={handleToggleSidebar}
-          isSidebarCollapsed={sidebarCollapsedDesktop}
-        />
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+      <div className="flex flex-1 flex-col min-w-0">
+        <Header onToggleSidebar={() => setSidebarOpen(prev => !prev)} />
+        <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
           {renderContent()}
         </main>
       </div>
