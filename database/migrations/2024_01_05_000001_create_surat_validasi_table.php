@@ -11,12 +11,12 @@ return new class extends Migration
         Schema::create('surat_validasi', function (Blueprint $table) {
             $table->id();
             $table->foreignId('surat_id')->constrained('surat')->cascadeOnDelete();
-            $table->foreignId('kades_id')->constrained('users')->restrictOnDelete();
+            $table->foreignId('validated_by')->constrained('users');
+            $table->string('validator_name');
             $table->enum('status', ['disetujui', 'ditolak']);
-            $table->text('catatan')->nullable(); // wajib diisi jika ditolak
-            $table->string('qr_code_path')->nullable(); // path file QR sebagai e-signature
-            $table->string('qr_code_hash')->nullable(); // hash unik untuk verifikasi keaslian
-            $table->timestamp('tanggal_validasi')->useCurrent();
+            $table->string('qr_code_token')->nullable();
+            $table->text('catatan')->nullable();
+            $table->timestamp('validated_at');
             $table->timestamps();
         });
     }

@@ -17,29 +17,15 @@ class JenisSurat extends Model
         'deskripsi',
         'template_field',
         'is_active',
-        'created_by',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'template_field' => 'array',
-            'is_active' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'template_field' => 'array',
+        'is_active' => 'boolean',
+    ];
 
-    public function suratList()
+    public function surat()
     {
         return $this->hasMany(Surat::class, 'jenis_surat_id');
-    }
-
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
     }
 }

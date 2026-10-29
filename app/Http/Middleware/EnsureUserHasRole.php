@@ -9,20 +9,19 @@ use Symfony\Component\HttpFoundation\Response;
 class EnsureUserHasRole
 {
     /**
-     * Batasi akses route berdasarkan role user.
-     * Contoh penggunaan di routes: ->middleware('role:kades')
-     * atau untuk beberapa role: ->middleware('role:staff,kades')
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        $user = $request->user();
-
-        if (! $user || ! $user->is_active) {
-            abort(403, 'Akun tidak aktif atau tidak memiliki akses.');
+        if (!auth()->check()) {
+            return redirect()->route('login');
         }
 
-        if (! in_array($user->role, $roles, true)) {
-            abort(403, 'Anda tidak memiliki izin untuk mengakses halaman ini.');
+        $user = auth()->user();
+        if (!in_array($user->role, $roles)) {
+            abort(403, 'Akses Ditolak: Anda tidak memiliki izin untuk membuka halaman ini.');
         }
 
         return $next($request);

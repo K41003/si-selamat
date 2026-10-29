@@ -1,25 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-xl font-bold text-slate-900">Tambah Data Warga</h1>
-    <p class="text-sm text-slate-500">Lengkapi form berikut untuk menambahkan data warga baru.</p>
-</div>
-
-<div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-    <form method="POST" action="{{ route('warga.store') }}">
-        @csrf
-
-        @include('warga._form')
-
-        <div class="mt-6 flex justify-end gap-2 border-t border-slate-100 pt-5">
-            <a href="{{ route('warga.index') }}" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">
-                Batal
-            </a>
-            <button type="submit" class="rounded-lg bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-                Simpan Data
-            </button>
+<div class="max-w-3xl mx-auto space-y-6">
+    <div class="flex items-center gap-3">
+        <a href="{{ route('warga.index') }}" class="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition shadow-xs">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Tambah Data Warga</h1>
+            <p class="text-xs text-slate-500">Formulir pendaftaran identitas kependudukan warga Desa Tanjung Selamat</p>
         </div>
-    </form>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 sm:p-8">
+        <form method="POST" action="{{ route('warga.store') }}" class="space-y-6">
+            @csrf
+            @include('warga._form')
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                <a href="{{ route('warga.index') }}" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                    Batal
+                </a>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#1E3A8A] hover:bg-[#172554] text-white text-xs sm:text-sm font-semibold shadow-xs transition">
+                    Simpan Data Warga
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection

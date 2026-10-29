@@ -11,32 +11,27 @@ class SuratValidasi extends Model
 
     protected $table = 'surat_validasi';
 
-    public $timestamps = true;
-
     protected $fillable = [
         'surat_id',
-        'kades_id',
-        'status',
+        'validated_by',
+        'validator_name',
+        'status', // disetujui, ditolak
+        'qr_code_token',
         'catatan',
-        'qr_code_path',
-        'qr_code_hash',
-        'tanggal_validasi',
+        'validated_at',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'tanggal_validasi' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'validated_at' => 'datetime',
+    ];
 
     public function surat()
     {
         return $this->belongsTo(Surat::class, 'surat_id');
     }
 
-    public function kades()
+    public function validator()
     {
-        return $this->belongsTo(User::class, 'kades_id');
+        return $this->belongsTo(User::class, 'validated_by');
     }
 }

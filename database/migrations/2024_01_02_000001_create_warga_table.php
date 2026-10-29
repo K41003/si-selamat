@@ -11,23 +11,19 @@ return new class extends Migration
         Schema::create('warga', function (Blueprint $table) {
             $table->id();
             $table->string('nik', 16)->unique();
-            $table->string('no_kk', 16)->nullable();
+            $table->string('no_kk', 16);
             $table->string('nama');
-            $table->string('tempat_lahir')->nullable();
-            $table->date('tanggal_lahir')->nullable();
-            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan'])->nullable();
-            $table->string('agama')->nullable();
-            $table->string('pekerjaan')->nullable();
-            $table->enum('status_perkawinan', ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'])->nullable();
-            $table->text('alamat')->nullable();
-            $table->string('rt', 5)->nullable();
-            $table->string('rw', 5)->nullable();
+            $table->string('tempat_lahir');
+            $table->date('tanggal_lahir');
+            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
+            $table->string('agama');
+            $table->string('pekerjaan');
+            $table->enum('status_perkawinan', ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati']);
+            $table->text('alamat');
+            $table->string('rt', 10)->nullable();
+            $table->string('rw', 10)->nullable();
             $table->string('no_hp', 20)->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
-
-            $table->index('nama');
         });
     }
 

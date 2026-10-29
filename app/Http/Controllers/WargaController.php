@@ -2,113 +2,140 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\WargaRequest;
-use App\Models\ActivityLog;
 use App\Models\Warga;
-use Illuminate\Http\RedirectResponse;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class WargaController extends Controller
 {
-    /**
-     * Menampilkan daftar lengkap data warga, dengan pencarian sederhana.
-     */
-    public function index(Request $request): View
+    public function index(Request $request)
     {
+        $q = $request->input('q');
+
         $query = Warga::query();
 
-        if ($search = $request->string('q')->trim()->value()) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%");
+        if ($q) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('nama', 'like', "%{$q}%")
+                    ->orWhere('nik', 'like', "%{$q}%")
+                    ->orWhere('no_kk', 'like', "%{$q}%");
             });
         }
 
-        $warga = $query->orderBy('nama')->paginate(15)->withQueryString();
+        $warga = $query->latest()->paginate(10)->withQueryString();
+        $totalWarga = Warga::count();
 
-        return view('warga.index', compact('warga'));
+        return view('warga.index', compact('warga', 'q', 'totalWarga'));
     }
 
-    /**
-     * Form tambah data warga baru.
-     */
-    public function create(): View
+    public function create()
     {
         return view('warga.create');
     }
 
-    /**
-     * Simpan data warga baru (Tambah Data).
-     */
-    public function store(WargaRequest $request): RedirectResponse
+    public function store(Request $request)
     {
-        $data = $request->validated();
-        $data['created_by'] = $request->user()->id;
+        $validated = $request->validate([
+            'nik' => ['required', 'string', 'size:16', 'unique:warga,nik'],
+            'no_kk' => ['required', 'string', 'size:16'],
+            'nama' => ['required', 'string', 'max:255'],
+            'tempat_lahir' => ['required', 'string', 'max:100'],
+            'tanggal_lahir' => ['required', 'date'],
+            'jenis_kelamin' => ['required', 'in:Laki-laki,Perempuan'],
+            'agama' => ['required', 'string', 'max:50'],
+            'pekerjaan' => ['required', 'string', 'max:100'],
+            'status_perkawinan' => ['required', 'in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati'],
+            'alamat' => ['required', 'string'],
+            'rt' => ['nullable', 'string', 'max:10'],
+            'rw' => ['nullable', 'string', 'max:10'],
+            'no_hp' => ['nullable', 'string', 'max:20'],
+        ]);
 
-        $warga = Warga::create($data);
+        $warga = Warga::create($validated);
 
-        ActivityLog::catat('Tambah Data Warga', "Menambahkan data warga: {$warga->nama} (NIK: {$warga->nik})", $warga);
+        ActivityLog::log(
+            'Tambah Data Warga',
+            "Menambahkan data warga: {$warga->nama} (NIK: {$warga->nik})",
+            'Warga',
+            $warga->id
+        );
 
-        return redirect()
-            ->route('warga.index')
-            ->with('success', 'Data berhasil ditambah.');
+        return redirect()->route('warga.index')->with('success', "Data warga {$warga->nama} berhasil ditambahkan.");
     }
 
-    /**
-     * Tampilkan detail satu warga.
-     */
-    public function show(Warga $warga): View
+    public function show(Warga $warga)
     {
+        $warga->load(['surat' => function ($q) {
+            $q->with('jenisSurat')->latest();
+        }]);
+
         return view('warga.show', compact('warga'));
     }
 
-    /**
-     * Form update data warga.
-     */
-    public function edit(Warga $warga): View
+    public function edit(Warga $warga)
     {
         return view('warga.edit', compact('warga'));
     }
 
-    /**
-     * Simpan perubahan data warga (Update Data).
-     */
-    public function update(WargaRequest $request, Warga $warga): RedirectResponse
+    public function update(Request $request, Warga $warga)
     {
-        $data = $request->validated();
-        $data['updated_by'] = $request->user()->id;
+        $validated = $request->validate([
+            'nik' => ['required', 'string', 'size:16', 'unique:warga,nik,' . $warga->id],
+            'no_kk' => ['required', 'string', 'size:16'],
+            'nama' => ['required', 'string', 'max:255'],
+            'tempat_lahir' => ['required', 'string', 'max:100'],
+            'tanggal_lahir' => ['required', 'date'],
+            'jenis_kelamin' => ['required', 'in:Laki-laki,Perempuan'],
+            'agama' => ['required', 'string', 'max:50'],
+            'pekerjaan' => ['required', 'string', 'max:100'],
+            'status_perkawinan' => ['required', 'in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati'],
+            'alamat' => ['required', 'string'],
+            'rt' => ['nullable', 'string', 'max:10'],
+            'rw' => ['nullable', 'string', 'max:10'],
+            'no_hp' => ['nullable', 'string', 'max:20'],
+        ]);
 
-        $warga->update($data);
+        $warga->update($validated);
 
-        ActivityLog::catat('Update Data Warga', "Memperbarui data warga: {$warga->nama} (NIK: {$warga->nik})", $warga);
+        ActivityLog::log(
+            'Update Data Warga',
+            "Memperbarui data warga: {$warga->nama} (NIK: {$warga->nik})",
+            'Warga',
+            $warga->id
+        );
 
-        return redirect()
-            ->route('warga.index')
-            ->with('success', 'Data berhasil diupdate.');
+        return redirect()->route('warga.index')->with('success', "Data warga {$warga->nama} berhasil diperbarui.");
     }
 
-    /**
-     * Hapus data warga.
-     */
-    public function destroy(Request $request, Warga $warga): RedirectResponse
+    public function destroy(Warga $warga)
     {
-        // Cegah hapus warga yang masih punya surat terkait, agar histori surat tidak rusak.
-        if ($warga->suratList()->exists()) {
-            return redirect()
-                ->route('warga.index')
-                ->with('error', 'Data warga tidak dapat dihapus karena memiliki riwayat permohonan surat.');
+        if ($warga->surat()->exists()) {
+            return back()->with('error', 'Data warga ini tidak dapat dihapus karena memiliki riwayat permohonan surat.');
         }
 
-        $namaWarga = $warga->nama;
-        $nikWarga = $warga->nik;
-
+        $nama = $warga->nama;
+        $nik = $warga->nik;
+        $id = $warga->id;
         $warga->delete();
 
-        ActivityLog::catat('Hapus Data Warga', "Menghapus data warga: {$namaWarga} (NIK: {$nikWarga})");
+        ActivityLog::log(
+            'Hapus Data Warga',
+            "Menghapus data kependudukan warga: {$nama} (NIK: {$nik})",
+            'Warga',
+            $id
+        );
 
-        return redirect()
-            ->route('warga.index')
-            ->with('success', 'Data berhasil dihapus.');
+        return redirect()->route('warga.index')->with('success', "Data warga {$nama} berhasil dihapus.");
+    }
+
+    public function apiSearch(Request $request)
+    {
+        $q = $request->input('q', '');
+        $warga = Warga::where('nama', 'like', "%{$q}%")
+            ->orWhere('nik', 'like', "%{$q}%")
+            ->limit(10)
+            ->get();
+
+        return response()->json($warga);
     }
 }
