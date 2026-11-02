@@ -1,120 +1,96 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-6">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('warga.index') }}" class="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition shadow-xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            </a>
-            <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ $warga->nama }}</h1>
-                <p class="text-xs text-slate-500 font-mono">NIK: {{ $warga->nik }} &bull; No. KK: {{ $warga->no_kk }}</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('surat.create', ['warga_id' => $warga->id]) }}" class="px-3.5 py-2 rounded-xl bg-[#1E3A8A] hover:bg-[#172554] text-white text-xs font-semibold transition inline-flex items-center gap-1.5 shadow-xs">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Buat Surat
-            </a>
-            <a href="{{ route('warga.edit', $warga) }}" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold transition shadow-xs">
-                Edit
-            </a>
-        </div>
-    </div>
+@php
+    $iconBtn = 'inline-flex size-9 items-center justify-center rounded-control text-ink-600 hover:bg-canvas hover:text-ink-900';
+    $biodata = [
+        'NIK'                     => ['v' => $warga->nik, 'mono' => true],
+        'No. KK'                  => ['v' => $warga->no_kk, 'mono' => true],
+        'Jenis kelamin'           => ['v' => $warga->jenis_kelamin],
+        'Agama'                   => ['v' => $warga->agama],
+        'Tempat & tanggal lahir'  => ['v' => $warga->tempat_lahir . ', ' . \Carbon\Carbon::parse($warga->tanggal_lahir)->locale('id')->translatedFormat('d F Y')],
+        'Status perkawinan'       => ['v' => $warga->status_perkawinan],
+        'Pekerjaan'               => ['v' => $warga->pekerjaan],
+        'No. telepon / HP'        => ['v' => $warga->no_hp ?: '-'],
+    ];
+@endphp
 
-    <!-- Profile Details Card -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6">
-        <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Biodata Kependudukan</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 text-xs">
-            <div>
-                <span class="text-slate-400 block mb-0.5">Nama Lengkap</span>
-                <span class="font-bold text-slate-800 text-sm">{{ $warga->nama }}</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block mb-0.5">Jenis Kelamin</span>
-                <span class="font-semibold text-slate-800">{{ $warga->jenis_kelamin }}</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block mb-0.5">Tempat & Tanggal Lahir</span>
-                <span class="font-semibold text-slate-800">{{ $warga->tempat_lahir }}, {{ date('d F Y', strtotime($warga->tanggal_lahir)) }}</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block mb-0.5">Agama</span>
-                <span class="font-semibold text-slate-800">{{ $warga->agama }}</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block mb-0.5">Pekerjaan</span>
-                <span class="font-semibold text-slate-800">{{ $warga->pekerjaan }}</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block mb-0.5">Status Perkawinan</span>
-                <span class="font-semibold text-slate-800">{{ $warga->status_perkawinan }}</span>
-            </div>
-            <div class="md:col-span-2">
-                <span class="text-slate-400 block mb-0.5">Alamat Tempat Tinggal</span>
-                <span class="font-semibold text-slate-800">{{ $warga->alamat }} (RT {{ $warga->rt ?? '-' }} / RW {{ $warga->rw ?? '-' }})</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block mb-0.5">No. Telepon / HP</span>
-                <span class="font-semibold text-slate-800">{{ $warga->no_hp ?: '-' }}</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block mb-0.5">Terdaftar Sejak</span>
-                <span class="text-slate-600">{{ $warga->created_at->format('d/m/Y H:i') }}</span>
-            </div>
-        </div>
-    </div>
+<div class="mx-auto max-w-4xl space-y-6">
+    <x-page-header :title="$warga->nama" subtitle="Data kependudukan warga Desa Tanjung Selamat." :back="route('warga.index')">
+        <x-slot:actions>
+            <x-button variant="secondary" href="{{ route('warga.edit', $warga) }}">
+                <x-icon name="pencil" class="size-4"/> Edit
+            </x-button>
+            <x-button href="{{ route('surat.create', ['warga_id' => $warga->id]) }}">
+                <x-icon name="plus" class="size-4"/> Buat surat
+            </x-button>
+        </x-slot:actions>
+    </x-page-header>
 
-    <!-- Riwayat Permohonan Surat -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+    <x-card>
+        <h2 class="text-title-sm font-semibold text-ink-900">Biodata kependudukan</h2>
+        <dl class="mt-5 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
+            @foreach($biodata as $label => $row)
             <div>
-                <h3 class="text-sm font-bold text-slate-900">Riwayat Permohonan Surat</h3>
-                <p class="text-xs text-slate-500">Daftar arsip dan permohonan surat atas nama warga ini</p>
+                <dt class="text-sm text-ink-600">{{ $label }}</dt>
+                <dd @class(['mt-0.5 font-medium text-ink-900', 'font-mono' => $row['mono'] ?? false])>{{ $row['v'] }}</dd>
             </div>
+            @endforeach
+            <div class="sm:col-span-2">
+                <dt class="text-sm text-ink-600">Alamat tempat tinggal</dt>
+                <dd class="mt-0.5 font-medium text-ink-900">{{ $warga->alamat }} <span class="font-normal text-ink-700">(RT {{ $warga->rt ?? '-' }} / RW {{ $warga->rw ?? '-' }})</span></dd>
+            </div>
+            <div>
+                <dt class="text-sm text-ink-600">Terdaftar sejak</dt>
+                <dd class="mt-0.5 tabular-nums text-ink-700">{{ $warga->created_at->format('d/m/Y H:i') }}</dd>
+            </div>
+        </dl>
+    </x-card>
+
+    <x-card :padded="false" class="overflow-hidden">
+        <div class="px-5 py-4 sm:px-6">
+            <h2 class="text-title-sm font-semibold text-ink-900">Riwayat permohonan surat</h2>
+            <p class="mt-0.5 text-sm text-ink-600">Arsip dan permohonan surat atas nama warga ini.</p>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-600 uppercase font-semibold border-b border-slate-100">
+        @if($warga->surat->isEmpty())
+            <div class="border-t border-line">
+                <x-empty-state title="Belum ada riwayat surat" description="Permohonan surat untuk warga ini akan muncul di sini.">
+                    <x-button href="{{ route('surat.create', ['warga_id' => $warga->id]) }}"><x-icon name="plus" class="size-4"/> Buat surat</x-button>
+                </x-empty-state>
+            </div>
+        @else
+            <x-data-table caption="Riwayat permohonan surat">
+                <x-slot:head>
                     <tr>
-                        <th class="px-5 py-3">No. Surat</th>
-                        <th class="px-5 py-3">Jenis Surat</th>
-                        <th class="px-5 py-3">Tanggal Pengajuan</th>
-                        <th class="px-5 py-3">Status</th>
-                        <th class="px-5 py-3 text-right">Aksi</th>
+                        <th scope="col">Surat</th>
+                        <th scope="col">Tanggal pengajuan</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-right"><span class="sr-only">Aksi</span></th>
                     </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($warga->surat as $s)
-                    <tr class="hover:bg-slate-50/80 transition">
-                        <td class="px-5 py-3 font-mono font-semibold text-slate-900">{{ $s->nomor_surat }}</td>
-                        <td class="px-5 py-3 text-slate-700">{{ $s->jenisSurat->nama_jenis ?? '-' }}</td>
-                        <td class="px-5 py-3 text-slate-500">{{ $s->created_at->format('d/m/Y') }}</td>
-                        <td class="px-5 py-3">
-                            <x-status-badge :status="$s->status" />
-                        </td>
-                        <td class="px-5 py-3 text-right space-x-1">
-                            <a href="{{ route('surat.show', $s) }}" class="p-1.5 text-slate-600 hover:text-blue-700 rounded-lg hover:bg-slate-100 inline-block" title="Detail">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            </a>
-                            @if($s->status === 'disetujui')
-                            <a href="{{ route('surat.print', $s) }}" target="_blank" class="p-1.5 text-emerald-600 hover:text-emerald-800 rounded-lg hover:bg-emerald-50 inline-block" title="Cetak Surat">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                            </a>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="px-5 py-6 text-center text-slate-400">Belum ada riwayat permohonan surat untuk warga ini.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+                </x-slot:head>
+                @foreach($warga->surat as $s)
+                <tr class="hover:bg-canvas/60">
+                    <td>
+                        <p class="font-medium text-ink-900">{{ $s->jenisSurat->nama_jenis ?? '-' }}</p>
+                        <p class="font-mono text-xs text-ink-600">{{ $s->nomor_surat }}</p>
+                    </td>
+                    <td class="whitespace-nowrap tabular-nums text-ink-700">{{ $s->created_at->format('d/m/Y') }}</td>
+                    <td><x-status-badge :status="$s->status" /></td>
+                    <td class="whitespace-nowrap text-right">
+                        <a href="{{ route('surat.show', $s) }}" class="{{ $iconBtn }}" title="Lihat detail" aria-label="Lihat detail surat {{ $s->nomor_surat }}">
+                            <x-icon name="eye" class="size-5"/>
+                        </a>
+                        @if($s->status === 'disetujui')
+                        <a href="{{ route('surat.print', $s) }}" target="_blank" rel="noopener" class="{{ $iconBtn }}" title="Cetak surat" aria-label="Cetak surat {{ $s->nomor_surat }}">
+                            <x-icon name="printer" class="size-5"/>
+                        </a>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            </x-data-table>
+        @endif
+    </x-card>
 </div>
 @endsection

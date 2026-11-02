@@ -11,7 +11,7 @@
         </a>
         @endif
         <div>
-            <h1 class="text-title font-bold text-ink-900">{{ $title }}</h1>
+            <h1 class="text-title font-semibold text-ink-900">{{ $title }}</h1>
             @if($subtitle)
             <p class="mt-0.5 text-sm text-ink-600">{{ $subtitle }}</p>
             @endif

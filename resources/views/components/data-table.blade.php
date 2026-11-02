@@ -7,9 +7,9 @@
      </x-data-table> --}}
 @props(['caption'])
 <div class="overflow-x-auto" role="region" aria-label="{{ $caption }}" tabindex="0">
-    <table class="w-full text-left text-sm [&_td]:px-4 [&_td]:py-3.5 [&_th]:px-4 [&_th]:py-3 [&_th]:font-semibold">
+    <table class="w-full text-left text-sm [&_td]:px-4 [&_td]:py-3.5 [&_th]:px-4 [&_th]:py-3 [&_th]:font-medium">
         <caption class="sr-only">{{ $caption }}</caption>
-        <thead class="border-b border-line bg-canvas text-ink-700">{{ $head }}</thead>
+        <thead class="border-b border-line bg-canvas text-ink-600">{{ $head }}</thead>
         <tbody class="divide-y divide-line">{{ $slot }}</tbody>
     </table>
 </div>

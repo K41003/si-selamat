@@ -5,117 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'SI SELAMAT' }} - Sistem Informasi Surat Desa Tanjung Selamat</title>
-    
+
     {{-- Aset dibangun oleh Vite (Tailwind v4 + font self-host). Jalankan `npm run build`. --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full flex flex-col">
     <a href="#konten-utama" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-700 focus:shadow-lg no-print">Lewati ke konten utama</a>
-    <div class="min-h-full flex flex-col">
-        <!-- Top Navbar -->
-        <header class="on-dark bg-brand-700 text-white shadow-md sticky top-0 z-40 no-print">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-white/10 p-2 rounded-xl backdrop-blur-sm border border-white/20">
-                            <svg class="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <span class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                                SI SELAMAT
-                                <span class="text-[10px] uppercase tracking-wider font-semibold bg-blue-500/30 text-blue-100 px-2 py-0.5 rounded-full border border-blue-400/30">Desa</span>
-                            </span>
-                            <p class="text-xs text-blue-200">Desa Tanjung Selamat &bull; Kec. Sunggal</p>
-                        </div>
-                    </div>
 
-                    <!-- User profile & Logout -->
-                    <div class="flex items-center space-x-4">
-                        @auth
-                        <div class="hidden md:flex flex-col text-right">
-                            <span class="text-sm font-semibold text-white">
-                                {{ auth()->user()->active_staff_name ?: auth()->user()->name }}
-                            </span>
-                            <span class="text-xs text-blue-200">
-                                {{ auth()->user()->role === 'kades' ? 'Kepala Desa Tanjung Selamat' : 'Staff Pelayanan Administrasi' }}
-                            </span>
+    @php
+        $isKades = auth()->check() && auth()->user()->isKades();
+        $pendingCount = $isKades ? \App\Models\Surat::where('status', 'diajukan')->count() : 0;
+
+        // [label, url, aktif?]
+        $menu = [
+            ['Dashboard',     route('dashboard'),     request()->routeIs('dashboard')],
+            ['Data Warga',    route('warga.index'),   request()->routeIs('warga.*')],
+            ['Daftar Surat',  route('surat.index'),   request()->routeIs('surat.index') || request()->routeIs('surat.show')],
+            ['Buat Surat',    route('surat.create'),  request()->routeIs('surat.create')],
+        ];
+        if ($isKades) {
+            $menu[] = ['Validasi Kades', route('validasi.index'), request()->routeIs('validasi.*')];
+        }
+        $menu[] = ['Log Aktivitas', route('logs.index'), request()->routeIs('logs.*')];
+    @endphp
+
+    <div class="min-h-full flex flex-col">
+        <header class="sticky top-0 z-40 border-b border-line bg-surface no-print">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex h-16 items-center justify-between gap-4">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-control">
+                        <span class="flex size-9 items-center justify-center rounded-control bg-brand-700 text-white">
+                            <x-icon name="building" class="size-5"/>
+                        </span>
+                        <span class="leading-tight">
+                            <span class="block text-base font-bold tracking-tight text-ink-900">SI SELAMAT</span>
+                            <span class="block text-xs text-ink-600">Desa Tanjung Selamat &bull; Kec. Sunggal</span>
+                        </span>
+                    </a>
+
+                    @auth
+                    <div class="flex items-center gap-4">
+                        <div class="hidden text-right leading-tight md:block">
+                            <p class="text-sm font-semibold text-ink-900">{{ auth()->user()->active_staff_name ?: auth()->user()->name }}</p>
+                            <p class="text-xs text-ink-600">{{ auth()->user()->role === 'kades' ? 'Kepala Desa Tanjung Selamat' : 'Staf Pelayanan Administrasi' }}</p>
                         </div>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                        <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition border border-white/10">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                </svg>
+                            <button type="submit" class="btn btn-secondary btn-sm">
+                                <x-icon name="logout" class="size-4"/>
                                 Keluar
                             </button>
                         </form>
-                        @endauth
                     </div>
+                    @endauth
                 </div>
-            </div>
 
-            <!-- Navigation Bar -->
-            <div class="bg-[#172554] border-t border-blue-800/60">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <nav aria-label="Menu utama" class="flex space-x-1 sm:space-x-3 overflow-x-auto py-2 text-sm font-medium">
-                        <a href="{{ route('dashboard') }}" @if(request()->routeIs('dashboard')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('dashboard') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
-                            Dashboard
-                        </a>
-                        <a href="{{ route('warga.index') }}" @if(request()->routeIs('warga.*')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('warga.*') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
-                            Data Warga
-                        </a>
-                        <a href="{{ route('surat.index') }}" @if(request()->routeIs('surat.index') || request()->routeIs('surat.show')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('surat.index') || request()->routeIs('surat.show') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
-                            Daftar Surat
-                        </a>
-                        <a href="{{ route('surat.create') }}" @if(request()->routeIs('surat.create')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('surat.create') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
-                            + Buat Surat
-                        </a>
-                        @if(auth()->check() && auth()->user()->isKades())
-                        <a href="{{ route('validasi.index') }}" @if(request()->routeIs('validasi.*')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 {{ request()->routeIs('validasi.*') ? 'bg-amber-600 text-white font-semibold' : 'text-amber-200 hover:bg-blue-900/50 hover:text-white' }}">
-                            <span>Validasi Kades</span>
-                            @php
-                                $pendingCount = \App\Models\Surat::where('status', 'diajukan')->count();
-                            @endphp
-                            @if($pendingCount > 0)
-                            <span class="bg-amber-500 text-slate-900 text-[10px] font-bold px-1.5 py-0.2 rounded-full">{{ $pendingCount }}</span>
-                            @endif
-                        </a>
+                <nav aria-label="Menu utama" class="-mb-px flex gap-1 overflow-x-auto">
+                    @foreach($menu as [$label, $url, $active])
+                    <a href="{{ $url }}" @if($active) aria-current="page" @endif
+                       class="inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm transition-colors {{ $active ? 'border-brand-700 font-semibold text-brand-700' : 'border-transparent font-medium text-ink-600 hover:border-line hover:text-ink-900' }}">
+                        {{ $label }}
+                        @if($label === 'Validasi Kades' && $pendingCount > 0)
+                        <span class="rounded-full bg-warning-100 px-1.5 text-xs font-semibold text-warning-800">{{ $pendingCount }}<span class="sr-only"> surat menunggu</span></span>
                         @endif
-                        <a href="{{ route('logs.index') }}" @if(request()->routeIs('logs.*')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('logs.*') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
-                            Log Aktivitas
-                        </a>
-                    </nav>
-                </div>
+                    </a>
+                    @endforeach
+                </nav>
             </div>
         </header>
 
-        <!-- Main Content Body -->
-        <main id="konten-utama" tabindex="-1" class="focus:outline-none flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-            <!-- Flash Notifications -->
+        <main id="konten-utama" tabindex="-1" class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 focus:outline-none sm:px-6 lg:px-8 lg:py-8">
             @if(session('success'))
-            <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3 shadow-sm no-print">
-                <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
+            <div role="status" class="mb-6 flex items-start gap-3 rounded-control border border-success-700/30 bg-success-100/60 p-4 text-sm text-success-800 no-print">
+                <x-icon name="check-circle" class="mt-0.5 size-5 shrink-0"/>
                 <span>{{ session('success') }}</span>
             </div>
             @endif
 
             @if(session('error'))
-            <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-3 shadow-sm no-print">
-                <svg class="w-5 h-5 text-rose-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                </svg>
+            <div role="alert" class="mb-6 flex items-start gap-3 rounded-control border border-danger-700/30 bg-danger-100/60 p-4 text-sm text-danger-800 no-print">
+                <x-icon name="exclamation" class="mt-0.5 size-5 shrink-0"/>
                 <span>{{ session('error') }}</span>
             </div>
             @endif
 
             @if($errors->any())
-            <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm shadow-sm no-print">
-                <p class="font-semibold mb-1">Terdapat kesalahan pada isian form:</p>
-                <ul class="list-disc pl-5 space-y-0.5 text-xs">
+            <div role="alert" class="mb-6 rounded-control border border-danger-700/30 bg-danger-100/60 p-4 text-sm text-danger-800 no-print">
+                <p class="mb-1 font-semibold">Terdapat kesalahan pada isian form:</p>
+                <ul class="list-disc space-y-0.5 pl-5">
                     @foreach($errors->all() as $err)
                     <li>{{ $err }}</li>
                     @endforeach
@@ -126,9 +103,8 @@
             @yield('content')
         </main>
 
-        <!-- Footer -->
-        <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500 no-print">
-            <div class="max-w-7xl mx-auto px-4">
+        <footer class="mt-auto border-t border-line py-5 text-center text-xs text-ink-600 no-print">
+            <div class="mx-auto max-w-7xl px-4">
                 &copy; {{ date('Y') }} SI SELAMAT &bull; Kantor Kepala Desa Tanjung Selamat, Kecamatan Sunggal, Kabupaten Deli Serdang.
             </div>
         </footer>
