@@ -1,207 +1,140 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-6">
-    <!-- Top Action Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('surat.index') }}" class="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition shadow-xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            </a>
-            <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ $surat->jenisSurat->nama_jenis }}</h1>
-                <p class="text-xs text-slate-500 font-mono">No. Surat: {{ $surat->nomor_surat }}</p>
-            </div>
-        </div>
+@php
+    $warga = $surat->warga;
+    $isKades = auth()->check() && auth()->user()->isKades();
+    $bisaValidasi = $isKades && $surat->status === 'diajukan';
+    $keterangan = [
+        'draft'     => 'Belum diajukan ke Kepala Desa.',
+        'diajukan'  => 'Menunggu peninjauan Kepala Desa.',
+        'disetujui' => 'Disetujui dan e-signature sudah diterbitkan.',
+        'ditolak'   => 'Ditolak. Surat perlu diperbaiki lalu diajukan kembali.',
+    ][$surat->status] ?? '';
+    $tglLahir = \Carbon\Carbon::parse($warga->tanggal_lahir)->locale('id')->translatedFormat('d F Y');
+    $catatanTolak = $surat->status === 'ditolak' && $surat->validasi ? $surat->validasi->catatan : null;
+@endphp
 
-        <div class="flex items-center gap-2">
+<div class="mx-auto max-w-4xl space-y-6">
+    <x-page-header :title="$surat->jenisSurat->nama_jenis" :subtitle="'No. Surat: ' . $surat->nomor_surat" :back="route('surat.index')">
+        <x-slot:actions>
             @if($surat->status === 'disetujui')
-            <a href="{{ route('surat.print', $surat) }}" target="_blank"
-                class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold transition shadow-sm inline-flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                <span>Cetak Surat Resmi</span>
-            </a>
+                <x-button href="{{ route('surat.print', $surat) }}" target="_blank" rel="noopener">
+                    <x-icon name="printer" class="size-4"/> Cetak surat resmi
+                </x-button>
+            @elseif($surat->status === 'draft')
+                <x-button variant="secondary" href="{{ route('surat.edit', $surat) }}">
+                    <x-icon name="pencil" class="size-4"/> Edit draf
+                </x-button>
+                <x-button type="button" onclick="openDialog('ajukan-{{ $surat->id }}')">
+                    Ajukan ke Kades <x-icon name="arrow-right" class="size-4"/>
+                </x-button>
+            @elseif($surat->status === 'ditolak')
+                <x-button href="{{ route('surat.edit', $surat) }}">
+                    <x-icon name="pencil" class="size-4"/> Revisi surat
+                </x-button>
             @endif
+        </x-slot:actions>
+    </x-page-header>
 
-            @if($surat->status === 'draft')
-            <form method="POST" action="{{ route('surat.ajukan', $surat) }}" class="inline">
-                @csrf
-                <button type="submit" onclick="return confirm('Ajukan surat ini ke Kepala Desa?')"
-                    class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold transition shadow-xs inline-flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    <span>Ajukan ke Kades</span>
-                </button>
-            </form>
-            <a href="{{ route('surat.edit', $surat) }}" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold transition shadow-xs">
-                Edit Draf
-            </a>
-            @endif
-
-            @if($surat->status === 'ditolak')
-            <a href="{{ route('surat.edit', $surat) }}" class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-semibold transition shadow-xs">
-                Revisi / Edit
-            </a>
-            @endif
-        </div>
-    </div>
-
-    <!-- Status Badge Card -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-            @if($surat->status === 'draft')
-            <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-            </span>
+    <x-card>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Status Dokumen</p>
-                <p class="text-sm font-bold text-amber-700">Draf Surat (Belum Diajukan)</p>
+                <p class="text-sm text-ink-600">Status dokumen</p>
+                <div class="mt-1.5 flex flex-wrap items-center gap-3">
+                    <x-status-badge :status="$surat->status" />
+                    <span class="text-sm text-ink-700">{{ $keterangan }}</span>
+                </div>
             </div>
-            @elseif($surat->status === 'diajukan')
-            <span class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </span>
-            <div>
-                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Status Dokumen</p>
-                <p class="text-sm font-bold text-blue-700">Menunggu Validasi Kepala Desa</p>
-            </div>
-            @elseif($surat->status === 'disetujui')
-            <span class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </span>
-            <div>
-                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Status Dokumen</p>
-                <p class="text-sm font-bold text-emerald-700">Disetujui & E-Signature Diterbitkan</p>
-            </div>
-            @else
-            <span class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </span>
-            <div>
-                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Status Dokumen</p>
-                <p class="text-sm font-bold text-rose-700">Permohonan Ditolak</p>
+            @if($bisaValidasi)
+            <div class="flex flex-wrap gap-2">
+                <x-button type="button" variant="secondary" onclick="openDialog('tolak-{{ $surat->id }}')" class="text-danger-800">Tolak</x-button>
+                <x-button type="button" variant="success" onclick="openDialog('setujui-{{ $surat->id }}')">
+                    <x-icon name="check-circle" class="size-4"/> Setujui surat
+                </x-button>
             </div>
             @endif
         </div>
 
-        @if(auth()->check() && auth()->user()->isKades() && $surat->status === 'diajukan')
-        <div class="flex items-center gap-2">
-            <form method="POST" action="{{ route('validasi.approve', $surat) }}" class="inline">
-                @csrf
-                <button type="submit" onclick="return confirm('Setujui dan tanda tangani surat ini?')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs">
-                    Setujui Surat
-                </button>
-            </form>
-            <button type="button" onclick="document.getElementById('rejectModal').classList.remove('hidden'); document.getElementById('rejectModal').classList.add('flex');"
-                class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold">
-                Tolak...
-            </button>
+        @if($catatanTolak)
+        <div role="note" class="mt-4 rounded-control border border-danger-700/30 bg-danger-100/60 p-4 text-sm text-danger-800">
+            <p class="font-semibold">Catatan dari Kepala Desa</p>
+            <p class="mt-1">{{ $catatanTolak }}</p>
         </div>
         @endif
+    </x-card>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <x-card>
+            <h2 class="text-title-sm font-semibold text-ink-900">Warga pemohon</h2>
+            <dl class="mt-4 space-y-4">
+                <div><dt class="text-sm text-ink-600">Nama lengkap</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->nama }}</dd></div>
+                <div><dt class="text-sm text-ink-600">NIK</dt><dd class="mt-0.5 font-mono text-ink-900">{{ $warga->nik }}</dd></div>
+                <div><dt class="text-sm text-ink-600">No. KK</dt><dd class="mt-0.5 font-mono text-ink-900">{{ $warga->no_kk }}</dd></div>
+                <div><dt class="text-sm text-ink-600">Tempat, tanggal lahir</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->tempat_lahir }}, {{ $tglLahir }}</dd></div>
+                <div><dt class="text-sm text-ink-600">Jenis kelamin / agama</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->jenis_kelamin }} &bull; {{ $warga->agama }}</dd></div>
+                <div><dt class="text-sm text-ink-600">Pekerjaan</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->pekerjaan }}</dd></div>
+                <div><dt class="text-sm text-ink-600">Alamat</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->alamat }} <span class="font-normal text-ink-700">(RT {{ $warga->rt ?? '-' }} / RW {{ $warga->rw ?? '-' }})</span></dd></div>
+            </dl>
+        </x-card>
+
+        <x-card>
+            <h2 class="text-title-sm font-semibold text-ink-900">Data isian surat</h2>
+            @if(!empty($surat->data_isian))
+            <dl class="mt-4 space-y-4">
+                @foreach($surat->data_isian as $key => $val)
+                <div>
+                    <dt class="text-sm capitalize text-ink-600">{{ str_replace('_', ' ', $key) }}</dt>
+                    <dd class="mt-0.5 break-words font-medium text-ink-900">{{ is_scalar($val) ? $val : json_encode($val) }}</dd>
+                </div>
+                @endforeach
+            </dl>
+            @else
+            <p class="mt-4 text-sm text-ink-600">Tidak ada data isian tambahan untuk surat ini.</p>
+            @endif
+        </x-card>
     </div>
 
-    <!-- Data Pemohon & Isian Surat -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Biodata Pemohon -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-4">
-            <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100">
-                Biodata Warga Pemohon
-            </h2>
-            <div class="space-y-2.5 text-xs">
-                <div>
-                    <span class="text-slate-400 block text-[11px]">Nama Lengkap:</span>
-                    <span class="font-bold text-slate-800 text-sm">{{ $surat->warga->nama }}</span>
-                </div>
-                <div>
-                    <span class="text-slate-400 block text-[11px]">NIK / No. KK:</span>
-                    <span class="font-mono text-slate-800">{{ $surat->warga->nik }} / {{ $surat->warga->no_kk }}</span>
-                </div>
-                <div>
-                    <span class="text-slate-400 block text-[11px]">Tempat, Tanggal Lahir:</span>
-                    <span class="text-slate-800 font-medium">{{ $surat->warga->tempat_lahir }}, {{ date('d F Y', strtotime($surat->warga->tanggal_lahir)) }}</span>
-                </div>
-                <div>
-                    <span class="text-slate-400 block text-[11px]">Jenis Kelamin / Agama:</span>
-                    <span class="text-slate-800 font-medium">{{ $surat->warga->jenis_kelamin }} &bull; {{ $surat->warga->agama }}</span>
-                </div>
-                <div>
-                    <span class="text-slate-400 block text-[11px]">Pekerjaan:</span>
-                    <span class="text-slate-800 font-medium">{{ $surat->warga->pekerjaan }}</span>
-                </div>
-                <div>
-                    <span class="text-slate-400 block text-[11px]">Alamat:</span>
-                    <span class="text-slate-800 font-medium">{{ $surat->warga->alamat }} (RT {{ $surat->warga->rt ?? '-' }} / RW {{ $surat->warga->rw ?? '-' }})</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Detail Keterangan Surat -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-4">
-            <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100">
-                Data Isian Keterangan Khusus
-            </h2>
-            <div class="space-y-3 text-xs">
-                @if(!empty($surat->data_isian))
-                    @foreach($surat->data_isian as $key => $val)
-                    <div>
-                        <span class="text-slate-400 block text-[11px] capitalize">{{ str_replace('_', ' ', $key) }}:</span>
-                        <span class="font-semibold text-slate-800 block bg-slate-50 p-2.5 rounded-xl border border-slate-100 mt-0.5">
-                            {{ $val }}
-                        </span>
-                    </div>
-                    @endforeach
-                @else
-                    <p class="text-slate-400 italic">Tidak ada data isian spesifik tambahan.</p>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    <!-- Riwayat Validasi & E-Signature -->
     @if($surat->validasi)
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-4">
-        <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100">
-            Catatan Keabsahan & E-Signature
-        </h2>
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-            <div class="space-y-1">
-                <p><strong>Divalidasi oleh:</strong> {{ $surat->validasi->validator_name }}</p>
-                <p><strong>Waktu Validasi:</strong> {{ $surat->validasi->validated_at->format('d/m/Y H:i:s') }}</p>
-                @if($surat->validasi->catatan)
-                <p><strong>Catatan:</strong> <span class="text-slate-600">{{ $surat->validasi->catatan }}</span></p>
+    <x-card>
+        <h2 class="text-title-sm font-semibold text-ink-900">Catatan keabsahan &amp; e-signature</h2>
+        <div class="mt-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+            <dl class="space-y-3">
+                <div><dt class="text-sm text-ink-600">Divalidasi oleh</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $surat->validasi->validator_name }}</dd></div>
+                <div><dt class="text-sm text-ink-600">Waktu validasi</dt><dd class="mt-0.5 tabular-nums text-ink-900">{{ $surat->validasi->validated_at->format('d/m/Y H:i:s') }}</dd></div>
+                @if($surat->validasi->catatan && $surat->status !== 'ditolak')
+                <div><dt class="text-sm text-ink-600">Catatan</dt><dd class="mt-0.5 text-ink-900">{{ $surat->validasi->catatan }}</dd></div>
                 @endif
-            </div>
-
+            </dl>
             @if($surat->validasi->qr_code_token)
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center shrink-0">
-                <span class="text-[10px] text-slate-400 font-semibold block uppercase">Token QR Resmi:</span>
-                <span class="font-mono text-xs font-bold text-blue-900">{{ $surat->validasi->qr_code_token }}</span>
+            <div class="shrink-0 rounded-control border border-line bg-canvas px-4 py-3 text-center">
+                <p class="text-sm text-ink-600">Token QR resmi</p>
+                <p class="mt-0.5 font-mono text-sm font-semibold text-brand-900">{{ $surat->validasi->qr_code_token }}</p>
             </div>
             @endif
         </div>
-    </div>
+    </x-card>
     @endif
 </div>
 
-<!-- Modal Tolak Surat (Kades) -->
-@if(auth()->check() && auth()->user()->isKades() && $surat->status === 'diajukan')
-<div id="rejectModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
-        <h3 class="text-base font-bold text-slate-900 mb-1">Tolak Permohonan Surat</h3>
-        <p class="text-xs text-slate-500 mb-4">Berikan catatan perbaikan agar staff dapat memperbaikinya:</p>
-        
-        <form method="POST" action="{{ route('validasi.reject', $surat) }}">
-            @csrf
-            <textarea name="catatan" required rows="3"
-                class="w-full p-3 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                placeholder="Alasan penolakan surat..."></textarea>
-            
-            <div class="mt-4 flex justify-end gap-2">
-                <button type="button" onclick="document.getElementById('rejectModal').classList.add('hidden'); document.getElementById('rejectModal').classList.remove('flex');"
-                    class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50">Batal</button>
-                <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold">Tolak Surat</button>
-            </div>
-        </form>
-    </div>
-</div>
+{{-- Dialog konfirmasi --}}
+@if($surat->status === 'draft')
+<x-confirm-dialog id="ajukan-{{ $surat->id }}" :action="route('surat.ajukan', $surat)"
+    title="Ajukan surat ke Kepala Desa?" confirm-label="Ajukan">
+    <p>Surat <span class="font-mono">{{ $surat->nomor_surat }}</span> untuk <strong>{{ $warga->nama }}</strong> akan dikirim ke Kepala Desa untuk divalidasi.</p>
+</x-confirm-dialog>
+@endif
+
+@if($bisaValidasi)
+<x-confirm-dialog id="setujui-{{ $surat->id }}" :action="route('validasi.approve', $surat)"
+    title="Setujui dan tanda tangani surat ini?" confirm-label="Setujui & tanda tangani" variant="success">
+    <p>Surat <span class="font-mono">{{ $surat->nomor_surat }}</span> untuk <strong>{{ $warga->nama }}</strong> akan disetujui dan e-signature diterbitkan atas nama Anda.</p>
+</x-confirm-dialog>
+
+<x-confirm-dialog id="tolak-{{ $surat->id }}" :action="route('validasi.reject', $surat)"
+    title="Tolak permohonan surat?" confirm-label="Tolak permohonan" variant="danger">
+    <p class="mb-4">Berikan catatan perbaikan agar staf dapat memperbaiki surat <span class="font-mono">{{ $surat->nomor_surat }}</span>.</p>
+    <x-field label="Alasan penolakan" name="catatan" as="textarea" rows="3" required id="catatan-{{ $surat->id }}" placeholder="Contoh: Alamat usaha belum lengkap." />
+</x-confirm-dialog>
 @endif
 @endsection

@@ -68,9 +68,45 @@ class SuratController extends Controller
             $selectedJenis = JenisSurat::find($request->jenis_id);
         }
 
-        $wargaList = Warga::orderBy('nama')->take(50)->get();
+        // Daftar warga TIDAK lagi dimuat di sini: pemilih warga memakai pencarian asinkron (cariWarga).
+        return view('surat.create', compact('jenisSuratList', 'selectedWarga', 'selectedJenis'));
+    }
 
-        return view('surat.create', compact('jenisSuratList', 'selectedWarga', 'selectedJenis', 'wargaList'));
+    /**
+     * Pencarian warga untuk pemilih asinkron di form surat.
+     * - Minimal 2 karakter, maksimal 10 hasil.
+     * - NIK dikembalikan dalam bentuk TERSAMAR saja (masked_nik); NIK asli tidak pernah dikirim ke browser.
+     */
+    public function cariWarga(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+
+        if (mb_strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        // Escape karakter khusus LIKE agar "%" dan "_" dicari apa adanya.
+        $like = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $q);
+
+        $hasil = Warga::query()
+            ->where(function ($w) use ($like) {
+                $w->where('nama', 'like', "%{$like}%")
+                  ->orWhere('nik', 'like', "{$like}%")
+                  ->orWhere('no_kk', 'like', "{$like}%");
+            })
+            ->orderBy('nama')
+            ->limit(10)
+            ->get()
+            ->map(fn (Warga $w) => [
+                'id' => $w->id,
+                'nama' => $w->nama,
+                'nik_masked' => $w->masked_nik,
+                'ttl' => $w->tempat_lahir . ', ' . date('d/m/Y', strtotime($w->tanggal_lahir)),
+                'pekerjaan' => $w->pekerjaan,
+                'alamat' => $w->alamat,
+            ]);
+
+        return response()->json($hasil);
     }
 
     public function store(Request $request)
@@ -130,10 +166,12 @@ class SuratController extends Controller
             return redirect()->route('surat.show', $surat)->with('error', 'Surat yang telah disetujui tidak dapat diedit kembali.');
         }
 
+        $surat->load(['warga', 'validasi']);
         $jenisSuratList = JenisSurat::where('is_active', true)->get();
-        $wargaList = Warga::orderBy('nama')->take(50)->get();
 
-        return view('surat.edit', compact('surat', 'jenisSuratList', 'wargaList'));
+        // Sebelumnya: Warga::orderBy('nama')->take(50). Jika warga surat ini di luar 50 data pertama,
+        // <select> tidak memuatnya dan menyimpan form diam-diam mengganti pemohon. Kini memakai pencarian asinkron.
+        return view('surat.edit', compact('surat', 'jenisSuratList'));
     }
 
     public function update(Request $request, Surat $surat)

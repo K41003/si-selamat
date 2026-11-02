@@ -35,6 +35,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('warga', WargaController::class);
 
     // Surat Management
+    Route::get('/cari-warga', [SuratController::class, 'cariWarga'])
+        ->middleware('throttle:60,1')
+        ->name('warga.cari');
     Route::post('/surat/{surat}/ajukan', [SuratController::class, 'ajukan'])->name('surat.ajukan');
     Route::get('/surat/{surat}/print', [SuratController::class, 'print'])->name('surat.print');
     Route::resource('surat', SuratController::class);
