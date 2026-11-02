@@ -53,9 +53,10 @@ class WargaController extends Controller
 
         $warga = Warga::create($validated);
 
+        // Log aktivitas dapat dibaca banyak orang: catat NIK TERSAMAR saja.
         ActivityLog::log(
             'Tambah Data Warga',
-            "Menambahkan data warga: {$warga->nama} (NIK: {$warga->nik})",
+            "Menambahkan data warga: {$warga->nama} (NIK: {$warga->masked_nik})",
             'Warga',
             $warga->id
         );
@@ -70,6 +71,24 @@ class WargaController extends Controller
         }]);
 
         return view('warga.show', compact('warga'));
+    }
+
+    /**
+     * Membuka NIK lengkap atas permintaan eksplisit (tombol "Tampilkan NIK").
+     * NIK asli tidak ikut dikirim bersama halaman; setiap pembukaan dicatat di log aktivitas.
+     */
+    public function tampilkanNik(Warga $warga)
+    {
+        ActivityLog::log(
+            'Buka NIK Warga',
+            "Membuka NIK lengkap warga: {$warga->nama} ({$warga->masked_nik})",
+            'Warga',
+            $warga->id
+        );
+
+        return response()
+            ->json(['nik' => $warga->nik])
+            ->header('Cache-Control', 'no-store, private');
     }
 
     public function edit(Warga $warga)
@@ -99,7 +118,7 @@ class WargaController extends Controller
 
         ActivityLog::log(
             'Update Data Warga',
-            "Memperbarui data warga: {$warga->nama} (NIK: {$warga->nik})",
+            "Memperbarui data warga: {$warga->nama} (NIK: {$warga->masked_nik})",
             'Warga',
             $warga->id
         );
@@ -114,7 +133,7 @@ class WargaController extends Controller
         }
 
         $nama = $warga->nama;
-        $nik = $warga->nik;
+        $nik = $warga->masked_nik;
         $id = $warga->id;
         $warga->delete();
 
@@ -128,14 +147,6 @@ class WargaController extends Controller
         return redirect()->route('warga.index')->with('success', "Data warga {$nama} berhasil dihapus.");
     }
 
-    public function apiSearch(Request $request)
-    {
-        $q = $request->input('q', '');
-        $warga = Warga::where('nama', 'like', "%{$q}%")
-            ->orWhere('nik', 'like', "%{$q}%")
-            ->limit(10)
-            ->get();
-
-        return response()->json($warga);
-    }
+    // apiSearch() DIHAPUS: mengembalikan seluruh kolom warga (termasuk NIK lengkap) untuk pengguna login mana pun.
+    // Fungsinya sudah digantikan SuratController@cariWarga yang hanya mengirim NIK tersamar.
 }

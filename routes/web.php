@@ -31,7 +31,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Warga Management
-    Route::get('/api/warga/search', [WargaController::class, 'apiSearch'])->name('warga.api.search');
+    Route::post('/warga/{warga}/nik', [WargaController::class, 'tampilkanNik'])
+        ->middleware('throttle:30,1')
+        ->name('warga.nik');
     Route::resource('warga', WargaController::class);
 
     // Surat Management

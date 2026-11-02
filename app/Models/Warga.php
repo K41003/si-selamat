@@ -27,6 +27,13 @@ class Warga extends Model
         'no_hp',
     ];
 
+    /**
+     * NIK tidak ikut saat model diubah menjadi JSON/array (response()->json($warga), @json($warga), dll.).
+     * Pengaman berlapis: kebocoran lewat serialisasi tidak mungkin terjadi tanpa disengaja.
+     * Akses langsung ($warga->nik) tetap berfungsi untuk surat cetak dan form edit.
+     */
+    protected $hidden = ['nik'];
+
     public function surat()
     {
         return $this->hasMany(Surat::class, 'warga_id');

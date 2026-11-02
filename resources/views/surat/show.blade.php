@@ -69,7 +69,7 @@
             <h2 class="text-title-sm font-semibold text-ink-900">Warga pemohon</h2>
             <dl class="mt-4 space-y-4">
                 <div><dt class="text-sm text-ink-600">Nama lengkap</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->nama }}</dd></div>
-                <div><dt class="text-sm text-ink-600">NIK</dt><dd class="mt-0.5 font-mono text-ink-900">{{ $warga->nik }}</dd></div>
+                <div><dt class="text-sm text-ink-600">NIK</dt><dd class="mt-1"><x-nik-reveal :warga="$warga" /></dd></div>
                 <div><dt class="text-sm text-ink-600">No. KK</dt><dd class="mt-0.5 font-mono text-ink-900">{{ $warga->no_kk }}</dd></div>
                 <div><dt class="text-sm text-ink-600">Tempat, tanggal lahir</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->tempat_lahir }}, {{ $tglLahir }}</dd></div>
                 <div><dt class="text-sm text-ink-600">Jenis kelamin / agama</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->jenis_kelamin }} &bull; {{ $warga->agama }}</dd></div>

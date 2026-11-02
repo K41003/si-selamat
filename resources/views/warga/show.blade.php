@@ -4,7 +4,6 @@
 @php
     $iconBtn = 'inline-flex size-9 items-center justify-center rounded-control text-ink-600 hover:bg-canvas hover:text-ink-900';
     $biodata = [
-        'NIK'                     => ['v' => $warga->nik, 'mono' => true],
         'No. KK'                  => ['v' => $warga->no_kk, 'mono' => true],
         'Jenis kelamin'           => ['v' => $warga->jenis_kelamin],
         'Agama'                   => ['v' => $warga->agama],
@@ -30,6 +29,10 @@
     <x-card>
         <h2 class="text-title-sm font-semibold text-ink-900">Biodata kependudukan</h2>
         <dl class="mt-5 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
+            <div>
+                <dt class="text-sm text-ink-600">NIK</dt>
+                <dd class="mt-1"><x-nik-reveal :warga="$warga" /></dd>
+            </div>
             @foreach($biodata as $label => $row)
             <div>
                 <dt class="text-sm text-ink-600">{{ $label }}</dt>
