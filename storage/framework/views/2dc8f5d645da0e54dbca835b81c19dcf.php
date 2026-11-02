@@ -131,15 +131,26 @@
 
                             </td>
                             <td class="px-5 py-3.5">
-                                <?php if($s->status === 'draft'): ?>
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">Draf</span>
-                                <?php elseif($s->status === 'diajukan'): ?>
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Diajukan</span>
-                                <?php elseif($s->status === 'disetujui'): ?>
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Disetujui</span>
-                                <?php else: ?>
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">Ditolak</span>
-                                <?php endif; ?>
+                                <?php if (isset($component)) { $__componentOriginal8c81617a70e11bcf247c4db924ab1b62 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-badge','data' => ['status' => $s->status]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('status-badge'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['status' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($s->status)]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $attributes = $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
+<?php $component = $__componentOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
+<?php unset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
+<?php endif; ?>
                             </td>
                             <td class="px-5 py-3.5 text-right space-x-1">
                                 <a href="<?php echo e(route('surat.show', $s)); ?>" class="p-1.5 text-slate-600 hover:text-blue-700 rounded-lg hover:bg-slate-100 transition inline-block" title="Detail">

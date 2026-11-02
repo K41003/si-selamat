@@ -84,6 +84,32 @@ php artisan serve
 
 Buka `http://localhost:8000` di browser.
 
+## Frontend & Design System (redesign Fase 1–2)
+
+Aset kini dibangun oleh **Vite + Tailwind v4** (CDN dihapus) dan font **Plus Jakarta Sans** dilayani dari server sendiri,
+jadi aplikasi tidak lagi bergantung pada internet untuk tampil benar. **Wajib** `npm install && npm run build`
+setelah mengambil perubahan ini (atau `npm run dev` saat pengembangan).
+
+- Token desain (warna, tipografi, radius) ada di `resources/css/app.css` pada blok `@theme`.
+  Semua pasangan teks/latar sudah dihitung >= 4.5:1. Gunakan `ink-600` untuk teks sekunder (bukan `slate-400`),
+  pasangan `*-100` + `*-800` untuk badge, dan border input `ink-500`.
+- Komponen Blade ada di `resources/views/components/`:
+
+| Komponen | Fungsi |
+|---|---|
+| `<x-button variant size href>` | Tombol/tautan-tombol, tinggi min. 44px |
+| `<x-field label name required hint as>` | Label + input + galat inline + ARIA otomatis (`as`: input/textarea/select) |
+| `<x-status-badge :status>` | Badge status surat (teks, bukan hanya warna) |
+| `<x-card>`, `<x-page-header>`, `<x-stat>`, `<x-empty-state>` | Pola halaman |
+| `<x-data-table caption>` | Tabel dengan caption sr-only & wilayah scroll yang bisa difokus |
+| `<x-confirm-dialog id action title>` | Pengganti `confirm()`; buka dengan `onclick="openDialog('id')"` |
+| `<x-icon name>` | Ikon SVG dekoratif (tombol ikon tetap wajib `aria-label`) |
+
+- Form yang dikirim (POST/PUT/DELETE) otomatis menonaktifkan tombol submit untuk mencegah kirim ganda
+  (lihat `resources/js/app.js`; tambahkan `data-allow-resubmit` pada form untuk mengecualikan).
+- Akun demo di halaman login hanya tampil saat `APP_ENV=local`.
+- Folder `src/`, `dist/`, `index.html`, `vite.config.ts` adalah prototipe React lama dan **tidak dipakai** oleh aplikasi Laravel.
+
 ## Struktur Database Singkat
 
 - `users` — akun Staff & Kades (kolom `role`)

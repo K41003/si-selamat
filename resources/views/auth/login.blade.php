@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50">
+<html lang="id" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk - SI SELAMAT Desa Tanjung Selamat</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { font-family: 'Poppins', system-ui, sans-serif; }</style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-slate-800">
     <div class="max-w-md w-full">
@@ -67,6 +63,8 @@
                 </button>
             </form>
 
+            {{-- Akun demo hanya tampil di lingkungan lokal; JANGAN tampil di produksi. --}}
+            @if(app()->environment('local'))
             <!-- Quick Demo Credentials Fill -->
             <div class="mt-6 pt-6 border-t border-slate-100">
                 <p class="text-xs font-semibold text-slate-500 mb-2">Akun Demo Resmi:</p>
@@ -83,14 +81,17 @@
                     </button>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 
+    @if(app()->environment('local'))
     <script>
         function fillCreds(u, p) {
             document.getElementById('username').value = u;
             document.getElementById('password').value = p;
         }
     </script>
+    @endif
 </body>
 </html>

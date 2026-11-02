@@ -131,15 +131,7 @@
                                 {{ $s->created_at->format('d/m/Y') }}
                             </td>
                             <td class="px-5 py-3.5">
-                                @if($s->status === 'draft')
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">Draf</span>
-                                @elseif($s->status === 'diajukan')
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Diajukan</span>
-                                @elseif($s->status === 'disetujui')
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Disetujui</span>
-                                @else
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">Ditolak</span>
-                                @endif
+                                <x-status-badge :status="$s->status" />
                             </td>
                             <td class="px-5 py-3.5 text-right space-x-1">
                                 <a href="{{ route('surat.show', $s) }}" class="p-1.5 text-slate-600 hover:text-blue-700 rounded-lg hover:bg-slate-100 transition inline-block" title="Detail">

@@ -1,49 +1,19 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50">
+<html lang="id" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'SI SELAMAT' }} - Sistem Informasi Surat Desa Tanjung Selamat</title>
     
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS CDN for instant styling in Laravel -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        accent: {
-                            DEFAULT: '#1E3A8A',
-                            hover: '#172554',
-                            light: '#eff6ff',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Poppins', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <style>
-        body { font-family: 'Poppins', system-ui, sans-serif; }
-        .tabular-nums { font-variant-numeric: tabular-nums; }
-        @media print {
-            .no-print { display: none !important; }
-        }
-    </style>
+    {{-- Aset dibangun oleh Vite (Tailwind v4 + font self-host). Jalankan `npm run build`. --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full flex flex-col text-slate-800 antialiased">
+<body class="h-full flex flex-col">
+    <a href="#konten-utama" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-700 focus:shadow-lg no-print">Lewati ke konten utama</a>
     <div class="min-h-full flex flex-col">
         <!-- Top Navbar -->
-        <header class="bg-[#1E3A8A] text-white shadow-md sticky top-0 z-40 no-print">
+        <header class="on-dark bg-brand-700 text-white shadow-md sticky top-0 z-40 no-print">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <div class="flex items-center space-x-3">
@@ -89,21 +59,21 @@
             <!-- Navigation Bar -->
             <div class="bg-[#172554] border-t border-blue-800/60">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <nav class="flex space-x-1 sm:space-x-3 overflow-x-auto py-2 text-xs sm:text-sm font-medium">
-                        <a href="{{ route('dashboard') }}" class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('dashboard') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
+                    <nav aria-label="Menu utama" class="flex space-x-1 sm:space-x-3 overflow-x-auto py-2 text-sm font-medium">
+                        <a href="{{ route('dashboard') }}" @if(request()->routeIs('dashboard')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('dashboard') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
                             Dashboard
                         </a>
-                        <a href="{{ route('warga.index') }}" class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('warga.*') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
+                        <a href="{{ route('warga.index') }}" @if(request()->routeIs('warga.*')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('warga.*') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
                             Data Warga
                         </a>
-                        <a href="{{ route('surat.index') }}" class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('surat.index') || request()->routeIs('surat.show') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
+                        <a href="{{ route('surat.index') }}" @if(request()->routeIs('surat.index') || request()->routeIs('surat.show')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('surat.index') || request()->routeIs('surat.show') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
                             Daftar Surat
                         </a>
-                        <a href="{{ route('surat.create') }}" class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('surat.create') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
+                        <a href="{{ route('surat.create') }}" @if(request()->routeIs('surat.create')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('surat.create') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
                             + Buat Surat
                         </a>
                         @if(auth()->check() && auth()->user()->isKades())
-                        <a href="{{ route('validasi.index') }}" class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 {{ request()->routeIs('validasi.*') ? 'bg-amber-600 text-white font-semibold' : 'text-amber-200 hover:bg-blue-900/50 hover:text-white' }}">
+                        <a href="{{ route('validasi.index') }}" @if(request()->routeIs('validasi.*')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 {{ request()->routeIs('validasi.*') ? 'bg-amber-600 text-white font-semibold' : 'text-amber-200 hover:bg-blue-900/50 hover:text-white' }}">
                             <span>Validasi Kades</span>
                             @php
                                 $pendingCount = \App\Models\Surat::where('status', 'diajukan')->count();
@@ -113,7 +83,7 @@
                             @endif
                         </a>
                         @endif
-                        <a href="{{ route('logs.index') }}" class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('logs.*') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
+                        <a href="{{ route('logs.index') }}" @if(request()->routeIs('logs.*')) aria-current="page" @endif class="px-3 py-1.5 rounded-lg transition {{ request()->routeIs('logs.*') ? 'bg-blue-600 text-white font-semibold' : 'text-blue-100 hover:bg-blue-900/50 hover:text-white' }}">
                             Log Aktivitas
                         </a>
                     </nav>
@@ -122,7 +92,7 @@
         </header>
 
         <!-- Main Content Body -->
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <main id="konten-utama" tabindex="-1" class="focus:outline-none flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
             <!-- Flash Notifications -->
             @if(session('success'))
             <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3 shadow-sm no-print">
