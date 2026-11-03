@@ -1,24 +1,24 @@
-- name: Deploy via FTP
-  uses: SamKirkland/FTP-Deploy-Action@v4.4.0
-  with:
-    server: ftpupload.net
-    username: ${{ secrets.FTP_USERNAME }}
-    password: ${{ secrets.FTP_PASSWORD }}
-    server-dir: /htdocs/
-    local-dir: ./
-    sftp_only: true
-    exclude: |
-      **/.git/**
-      **/.github/**
-      **/.env
-      **/.env.example
-      **/node_modules/**
-      **/tests/**
-      **/*.md
-      **/phpunit.xml
-      **/vite.config.js
-      **/tailwind.config.js
-      **/package.json
-      **/package-lock.json
-    timeout: 86400000
-    log-level: verbose
+name: Deploy via FTP
+uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+with:
+  server: ftpupload.net
+  username: ${{ secrets.FTP_USERNAME }}
+  password: ${{ secrets.FTP_PASSWORD }}
+  server-dir: /htdocs/
+  local-dir: ./
+  sftp_only: true
+  exclude: |
+    **/.git/**
+    **/.github/**
+    **/.env
+    **/.env.example
+    **/node_modules/**
+    **/tests/**
+    **/*.md
+    **/phpunit.xml
+    **/vite.config.js
+    **/tailwind.config.js
+    **/package.json
+    **/package-lock.json
+  timeout: 86400000
+  log-level: verbose
