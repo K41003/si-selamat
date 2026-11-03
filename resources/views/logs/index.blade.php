@@ -1,91 +1,156 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header Page -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Log Aktivitas & Audit Trail</h1>
-            <p class="text-xs sm:text-sm text-slate-500">Rekam jejak seluruh aktivitas staf dan kepala desa pada sistem</p>
-        </div>
-    </div>
+@php
+    $tabs = [
+        ''      => 'Semua',
+        'surat' => 'Surat',
+        'warga' => 'Warga',
+        'nik'   => 'Akses NIK',
+        'akses' => 'Login / Logout',
+    ];
 
-    <!-- Filter Bar -->
-    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-        <form method="GET" action="{{ route('logs.index') }}" class="flex flex-col sm:flex-row gap-3">
-            <div class="sm:w-48">
-                <select name="role" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none bg-white">
-                    <option value="">Semua Peran</option>
+    // Hitung per kategori untuk label tab
+    $counts = [
+        ''      => \App\Models\ActivityLog::count(),
+        'surat' => \App\Models\ActivityLog::whereIn('aksi', ['Buat Surat','Ajukan Surat','Validasi Surat','Tolak Surat','Hapus Surat','Cetak Surat'])->count(),
+        'warga' => \App\Models\ActivityLog::whereIn('aksi', ['Tambah Warga','Ubah Warga','Hapus Warga'])->count(),
+        'nik'   => \App\Models\ActivityLog::whereIn('aksi', ['Buka NIK Warga'])->count(),
+        'akses' => \App\Models\ActivityLog::whereIn('aksi', ['Login Sistem','Logout Sistem'])->count(),
+    ];
+@endphp
+
+<div class="space-y-6">
+    <x-page-header title="Log Aktivitas &amp; Audit Trail"
+                   subtitle="Rekam jejak seluruh tindakan staf dan kepala desa pada sistem." />
+
+    <x-card :padded="false" class="overflow-hidden">
+
+        {{-- Tab kategori — pola sama dengan surat/index --}}
+        <nav aria-label="Filter kategori log" class="flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line px-3 sm:px-4">
+            @foreach($tabs as $val => $label)
+            @php $aktif = ($jenis ?? '') === $val; @endphp
+            <a href="{{ route('logs.index', array_merge(request()->only('q', 'role'), ['jenis' => $val])) }}"
+               @if($aktif) aria-current="page" @endif
+               class="inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm transition-colors
+                      {{ $aktif
+                          ? 'border-brand-700 font-semibold text-brand-700'
+                          : 'border-transparent font-medium text-ink-600 hover:border-line hover:text-ink-900' }}">
+                {{ $label }}
+                <span class="font-normal tabular-nums text-ink-600">{{ $counts[$val] }}</span>
+            </a>
+            @endforeach
+        </nav>
+
+        {{-- Filter pencarian + peran --}}
+        <form method="GET" action="{{ route('logs.index') }}" role="search"
+              class="flex flex-col gap-2 border-b border-line p-4 sm:flex-row">
+            <input type="hidden" name="jenis" value="{{ $jenis ?? '' }}">
+
+            {{-- Dropdown peran --}}
+            <div class="sm:w-52">
+                <label class="sr-only" for="filter-role">Filter peran</label>
+                <select id="filter-role" name="role" class="field">
+                    <option value="">Semua peran</option>
                     <option value="Staff Pelayanan" {{ ($role ?? '') === 'Staff Pelayanan' ? 'selected' : '' }}>Staff Pelayanan</option>
-                    <option value="Kepala Desa" {{ ($role ?? '') === 'Kepala Desa' ? 'selected' : '' }}>Kepala Desa</option>
+                    <option value="Kepala Desa"     {{ ($role ?? '') === 'Kepala Desa'     ? 'selected' : '' }}>Kepala Desa</option>
                 </select>
             </div>
+
+            {{-- Input pencarian --}}
             <div class="relative flex-1">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <input type="text" name="q" value="{{ $search ?? '' }}" placeholder="Cari aksi, nama petugas, deskripsi log..."
-                    class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none">
+                <label for="cari-log" class="sr-only">Cari log aktivitas</label>
+                <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-600" />
+                <input id="cari-log" type="search" name="q" value="{{ $search ?? '' }}"
+                       placeholder="Cari nama petugas, jenis tindakan, atau deskripsi…"
+                       class="field pl-10">
             </div>
-            <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-medium transition">
-                Filter
-            </button>
-            @if(!empty($search) || !empty($role))
-            <a href="{{ route('logs.index') }}" class="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs sm:text-sm font-medium transition flex items-center justify-center">
-                Reset
-            </a>
-            @endif
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">Cari</button>
+                @if(!empty($search) || !empty($role))
+                <a href="{{ route('logs.index', ['jenis' => $jenis ?? '']) }}" class="btn btn-ghost">Reset</a>
+                @endif
+            </div>
         </form>
-    </div>
 
-    <!-- Logs Table -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-600 uppercase tracking-wider font-semibold border-b border-slate-100">
+        {{-- Tabel log --}}
+        @if($logs->isEmpty())
+            <x-empty-state icon="clock"
+                           title="Tidak ada log yang ditemukan"
+                           :description="!empty($search) ? 'Coba kata kunci lain atau hapus pencarian.' : 'Belum ada aktivitas pada kategori ini.'" >
+                @if(!empty($search))
+                <a href="{{ route('logs.index', ['jenis' => $jenis ?? '']) }}" class="btn btn-secondary">Hapus pencarian</a>
+                @endif
+            </x-empty-state>
+        @else
+            <x-data-table caption="Log aktivitas dan audit trail">
+                <x-slot:head>
                     <tr>
-                        <th class="px-5 py-3">Waktu Kejadian</th>
-                        <th class="px-5 py-3">Petugas Pelaksana</th>
-                        <th class="px-5 py-3">Jenis Tindakan</th>
-                        <th class="px-5 py-3">Deskripsi Aktivitas</th>
+                        <th scope="col" class="w-44">Waktu</th>
+                        <th scope="col">Petugas</th>
+                        <th scope="col">Tindakan</th>
+                        <th scope="col">Deskripsi</th>
                     </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($logs as $log)
-                    <tr class="hover:bg-slate-50/80 transition">
-                        <td class="px-5 py-3.5 whitespace-nowrap text-slate-500 font-mono">
+                </x-slot:head>
+
+                @foreach($logs as $log)
+                <tr class="hover:bg-canvas/60">
+
+                    {{-- Waktu --}}
+                    <td class="whitespace-nowrap align-top">
+                        <time datetime="{{ $log->created_at->toIso8601String() }}"
+                              class="block tabular-nums text-ink-900">
                             {{ $log->created_at->format('d/m/Y H:i:s') }}
-                            <span class="block text-[10px] text-slate-400 font-sans">{{ $log->created_at->diffForHumans() }}</span>
-                        </td>
-                        <td class="px-5 py-3.5 whitespace-nowrap">
-                            <span class="font-bold text-slate-900 block">{{ $log->user_name }}</span>
-                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-semibold mt-0.5 {{ $log->user_role === 'Kepala Desa' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-blue-50 text-blue-800 border border-blue-200' }}">
-                                {{ $log->user_role }}
-                            </span>
-                        </td>
-                        <td class="px-5 py-3.5 whitespace-nowrap">
-                            <span class="font-semibold text-slate-800">{{ $log->aksi }}</span>
-                        </td>
-                        <td class="px-5 py-3.5 text-slate-600 leading-relaxed">
-                            {{ $log->deskripsi }}
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="px-5 py-8 text-center text-slate-400">
-                            Tidak ditemukan log aktivitas yang sesuai.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                        </time>
+                        <span class="text-xs text-ink-600">{{ $log->created_at->diffForHumans() }}</span>
+                    </td>
 
-        @if($logs->hasPages())
-        <div class="p-4 border-t border-slate-100">
-            {{ $logs->links() }}
-        </div>
+                    {{-- Petugas --}}
+                    <td class="whitespace-nowrap align-top">
+                        <p class="font-medium text-ink-900">{{ $log->user_name }}</p>
+                        @php $isKades = $log->user_role === 'Kepala Desa'; @endphp
+                        <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold
+                                     {{ $isKades ? 'bg-warning-100 text-warning-800' : 'bg-info-100 text-info-800' }}">
+                            <span class="size-1.5 rounded-full bg-current" aria-hidden="true"></span>
+                            {{ $log->user_role }}
+                        </span>
+                    </td>
+
+                    {{-- Tindakan --}}
+                    <td class="whitespace-nowrap align-top">
+                        @php
+                            $aksiLower = strtolower($log->aksi);
+                            $tone = match(true) {
+                                str_contains($aksiLower, 'nik')                                      => 'bg-danger-100 text-danger-800',
+                                str_contains($aksiLower, 'warga')                                    => 'bg-info-100 text-info-800',
+                                str_contains($aksiLower, 'surat')                                    => 'bg-success-100 text-success-800',
+                                str_contains($aksiLower, 'login') || str_contains($aksiLower, 'logout') => 'bg-canvas text-ink-700',
+                                default                                                              => 'bg-canvas text-ink-700',
+                            };
+                        @endphp
+                        <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold {{ $tone }}">
+                            <span class="size-1.5 rounded-full bg-current" aria-hidden="true"></span>
+                            {{ $log->aksi }}
+                        </span>
+                    </td>
+
+                    {{-- Deskripsi --}}
+                    <td class="align-top text-ink-700">
+                        {{ $log->deskripsi }}
+                    </td>
+
+                </tr>
+                @endforeach
+            </x-data-table>
+
+            @if($logs->hasPages())
+            <div class="border-t border-line p-4">
+                {{ $logs->links() }}
+            </div>
+            @endif
         @endif
-    </div>
+
+    </x-card>
 </div>
 @endsection

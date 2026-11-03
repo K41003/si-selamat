@@ -22,6 +22,9 @@
             'jenisTerpilihId' => $surat->jenis_surat_id,
             'isianAwal'       => $surat->data_isian ?? [],
             'batalUrl'        => route('surat.show', $surat),
+            'nomorSuratEksis' => $surat->nomor_surat,
+            'nextNomorUrut'   => $nextNomorUrut ?? '01',
+            'tahun'           => $tahun ?? date('Y'),
         ])
     </form>
 </div>

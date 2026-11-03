@@ -8,9 +8,11 @@
         @csrf
         @include('surat._form', [
             'wargaTerpilih'   => $selectedWarga,
-            'jenisTerpilihId' => $selectedJenis->id ?? ($jenisSuratList->first()->id ?? null),
+            'jenisTerpilihId' => $selectedJenis->id ?? null,
             'isianAwal'       => [],
             'batalUrl'        => route('surat.index'),
+            'nextNomorUrut'   => $nextNomorUrut ?? '01',
+            'tahun'           => $tahun ?? date('Y'),
         ])
     </form>
 </div>

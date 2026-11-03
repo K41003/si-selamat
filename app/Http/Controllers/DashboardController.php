@@ -24,11 +24,11 @@ class DashboardController extends Controller
     private function staffDashboard()
     {
         $stats = [
-            'total_warga' => Warga::count(),
-            'total_surat' => Surat::count(),
-            'total_draft' => Surat::where('status', 'draft')->count(),
+            'total_warga'    => Warga::count(),
+            'total_surat'    => Surat::count(),
+            'total_draft'    => Surat::where('status', 'draft')->count(),
             'total_diajukan' => Surat::where('status', 'diajukan')->count(),
-            'total_disetujui' => Surat::where('status', 'disetujui')->count(),
+            'total_disetujui'=> Surat::where('status', 'disetujui')->count(),
         ];
 
         $recentSurat = Surat::with(['warga', 'jenisSurat'])
@@ -36,7 +36,11 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        $recentLogs = ActivityLog::latest()->take(5)->get();
+        // Aktivitas untuk dashboard: sembunyikan login/logout agar aktivitas surat & warga terlihat
+        $recentLogs = ActivityLog::whereNotIn('aksi', ['Login Sistem', 'Logout Sistem'])
+            ->latest()
+            ->take(6)
+            ->get();
 
         return view('dashboard.staff', compact('stats', 'recentSurat', 'recentLogs'));
     }
@@ -45,10 +49,10 @@ class DashboardController extends Controller
     {
         $stats = [
             'perlu_validasi' => Surat::where('status', 'diajukan')->count(),
-            'disetujui' => Surat::where('status', 'disetujui')->count(),
-            'ditolak' => Surat::where('status', 'ditolak')->count(),
-            'total_surat' => Surat::count(),
-            'total_warga' => Warga::count(),
+            'disetujui'      => Surat::where('status', 'disetujui')->count(),
+            'ditolak'        => Surat::where('status', 'ditolak')->count(),
+            'total_surat'    => Surat::count(),
+            'total_warga'    => Warga::count(),
         ];
 
         $pendingSurat = Surat::with(['warga', 'jenisSurat', 'pembuat'])

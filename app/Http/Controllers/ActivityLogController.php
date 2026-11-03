@@ -7,15 +7,29 @@ use Illuminate\Http\Request;
 
 class ActivityLogController extends Controller
 {
+    // Kelompok aksi → kategori filter
+    private const KATEGORI = [
+        'surat'  => ['Buat Surat', 'Ajukan Surat', 'Validasi Surat', 'Tolak Surat', 'Hapus Surat', 'Cetak Surat'],
+        'warga'  => ['Tambah Warga', 'Ubah Warga', 'Hapus Warga'],
+        'nik'    => ['Buka NIK Warga'],
+        'akses'  => ['Login Sistem', 'Logout Sistem'],
+    ];
+
     public function index(Request $request)
     {
-        $role = $request->input('role');
+        $role   = $request->input('role');
         $search = $request->input('q');
+        $jenis  = $request->input('jenis'); // surat | warga | nik | akses | '' (semua)
 
         $query = ActivityLog::query();
 
         if ($role) {
             $query->where('user_role', $role);
+        }
+
+        // Filter kategori jenis tindakan
+        if ($jenis && isset(self::KATEGORI[$jenis])) {
+            $query->whereIn('aksi', self::KATEGORI[$jenis]);
         }
 
         if ($search) {
@@ -26,8 +40,8 @@ class ActivityLogController extends Controller
             });
         }
 
-        $logs = $query->latest()->paginate(20)->withQueryString();
+        $logs = $query->latest()->paginate(25)->withQueryString();
 
-        return view('logs.index', compact('logs', 'role', 'search'));
+        return view('logs.index', compact('logs', 'role', 'search', 'jenis'));
     }
 }

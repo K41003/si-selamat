@@ -68,19 +68,33 @@ class SuratController extends Controller
             $selectedJenis = JenisSurat::find($request->jenis_id);
         }
 
-        // Daftar warga TIDAK lagi dimuat di sini: pemilih warga memakai pencarian asinkron (cariWarga).
-        return view('surat.create', compact('jenisSuratList', 'selectedWarga', 'selectedJenis'));
+        $tahun = date('Y');
+        $count = Surat::whereYear('created_at', $tahun)->count() + 1;
+        $nextNomorUrut = str_pad((string)$count, 2, '0', STR_PAD_LEFT);
+
+        return view('surat.create', compact('jenisSuratList', 'selectedWarga', 'selectedJenis', 'nextNomorUrut', 'tahun'));
     }
 
     /**
-     * Pencarian warga untuk pemilih asinkron di form surat.
-     * - Minimal 2 karakter, maksimal 10 hasil.
-     * - NIK dikembalikan dalam bentuk TERSAMAR saja (masked_nik); NIK asli tidak pernah dikirim ke browser.
+     * Pencarian warga untuk pemilih asinkron dan autofill NIK di form surat.
+     * - Mendukung pencarian via 'nik' langsung atau 'q' (nama / NIK / No. KK).
+     * - Mengembalikan profil lengkap warga untuk preview otomatis.
      */
     public function cariWarga(Request $request)
     {
-        $q = trim((string) $request->query('q', ''));
+        $nik = trim((string) $request->query('nik', ''));
+        if ($nik !== '') {
+            $warga = Warga::where('nik', $nik)->first();
+            if ($warga) {
+                return response()->json([
+                    'found' => true,
+                    'warga' => $this->formatWargaData($warga),
+                ]);
+            }
+            return response()->json(['found' => false]);
+        }
 
+        $q = trim((string) $request->query('q', ''));
         if (mb_strlen($q) < 2) {
             return response()->json([]);
         }
@@ -97,16 +111,31 @@ class SuratController extends Controller
             ->orderBy('nama')
             ->limit(10)
             ->get()
-            ->map(fn (Warga $w) => [
-                'id' => $w->id,
-                'nama' => $w->nama,
-                'nik_masked' => $w->masked_nik,
-                'ttl' => $w->tempat_lahir . ', ' . date('d/m/Y', strtotime($w->tanggal_lahir)),
-                'pekerjaan' => $w->pekerjaan,
-                'alamat' => $w->alamat,
-            ]);
+            ->map(fn (Warga $w) => $this->formatWargaData($w));
 
         return response()->json($hasil);
+    }
+
+    private function formatWargaData(Warga $w): array
+    {
+        return [
+            'id' => $w->id,
+            'nik' => $w->nik,
+            'nik_masked' => $w->masked_nik,
+            'nama' => $w->nama,
+            'no_kk' => $w->no_kk,
+            'tempat_lahir' => $w->tempat_lahir,
+            'tanggal_lahir' => date('d/m/Y', strtotime($w->tanggal_lahir)),
+            'ttl' => $w->tempat_lahir . ', ' . date('d/m/Y', strtotime($w->tanggal_lahir)),
+            'jenis_kelamin' => $w->jenis_kelamin,
+            'agama' => $w->agama,
+            'pekerjaan' => $w->pekerjaan,
+            'status_perkawinan' => $w->status_perkawinan,
+            'alamat' => $w->alamat,
+            'rt' => $w->rt ?? '-',
+            'rw' => $w->rw ?? '-',
+            'alamat_lengkap' => $w->alamat . ($w->rt || $w->rw ? " (RT {$w->rt} / RW {$w->rw})" : ''),
+        ];
     }
 
     public function store(Request $request)
@@ -169,9 +198,11 @@ class SuratController extends Controller
         $surat->load(['warga', 'validasi']);
         $jenisSuratList = JenisSurat::where('is_active', true)->get();
 
-        // Sebelumnya: Warga::orderBy('nama')->take(50). Jika warga surat ini di luar 50 data pertama,
-        // <select> tidak memuatnya dan menyimpan form diam-diam mengganti pemohon. Kini memakai pencarian asinkron.
-        return view('surat.edit', compact('surat', 'jenisSuratList'));
+        $tahun = date('Y');
+        $count = Surat::whereYear('created_at', $tahun)->count() + 1;
+        $nextNomorUrut = str_pad((string)$count, 2, '0', STR_PAD_LEFT);
+
+        return view('surat.edit', compact('surat', 'jenisSuratList', 'nextNomorUrut', 'tahun'));
     }
 
     public function update(Request $request, Surat $surat)
