@@ -1,511 +1,285 @@
-{{-- Form surat (dipakai create & edit).
-     Variabel: $jenisSuratList, $wargaTerpilih (Warga|null), $jenisTerpilihId, $isianAwal (array), $batalUrl, $nextNomorUrut, $tahun, $nomorSuratEksis (string|null) --}}
+{{-- Form Surat Live Sheet (Editor langsung di atas format kertas surat fisik) --}}
 @php
-    $jenisTerpilih = old('jenis_surat_id', $jenisTerpilihId ?? null);
-    $isianErrors = collect($errors->messages())
-        ->filter(fn ($m, $k) => str_starts_with($k, 'data_isian.'))
-        ->map(fn ($m) => $m[0]);
-    $serverErrorWarga = $errors->first('warga_id');
+    $intro = [
+        'SKD' => [
+            ['t' => 'Adalah benar yang namanya tersebut di atas adalah warga penduduk yang berdomisili dan bertempat tinggal di wilayah Desa Tanjung Selamat, Kecamatan Sunggal, Kabupaten Deli Serdang.'],
+        ],
+        'SKTM' => [
+            ['t' => 'Adalah benar yang namanya tersebut di atas adalah warga penduduk Desa Tanjung Selamat, Kecamatan Sunggal, Kabupaten Deli Serdang yang berdasarkan data dan pengamatan di lapangan tergolong dalam keluarga yang '],
+            ['t' => 'BERPENGHASILAN RENDAH / TIDAK MAMPU', 'b' => true],
+            ['t' => '.'],
+        ],
+        'SKU' => [
+            ['t' => 'Menerangkan dengan sebenarnya bahwa orang tersebut di atas adalah benar memiliki dan menjalankan usaha di wilayah Desa Tanjung Selamat dengan rincian sebagai berikut:'],
+        ],
+        'SKIK' => [
+            ['t' => 'Menerangkan dengan sebenarnya bahwa yang bersangkutan bermaksud menyelenggarakan kegiatan / acara keramaian di wilayah Desa Tanjung Selamat dengan rincian sebagai berikut:'],
+        ],
+        'SKM' => [
+            ['t' => 'Menerangkan dengan sebenarnya bahwa telah berpulang ke rahmatullah warga penduduk Desa Tanjung Selamat dengan rincian sebagai berikut:'],
+        ],
+        'DEFAULT' => [
+            ['t' => 'Menerangkan dengan sebenarnya bahwa yang bersangkutan adalah warga Desa Tanjung Selamat dengan data keterangan pendukung:'],
+        ],
+    ];
 
-    $wargaData = null;
     $initialWarga = old('warga_id') ? \App\Models\Warga::find(old('warga_id')) : ($wargaTerpilih ?? null);
+    $initialWargaData = null;
     if ($initialWarga) {
-        $wargaData = [
+        $initialWargaData = [
             'id' => $initialWarga->id,
             'nik' => $initialWarga->nik,
-            'nik_masked' => $initialWarga->masked_nik,
             'nama' => $initialWarga->nama,
             'no_kk' => $initialWarga->no_kk,
-            'ttl' => $initialWarga->tempat_lahir . ', ' . date('d/m/Y', strtotime($initialWarga->tanggal_lahir)),
+            'tempat_lahir' => $initialWarga->tempat_lahir,
+            'tanggal_lahir' => $initialWarga->tanggal_lahir,
             'jenis_kelamin' => $initialWarga->jenis_kelamin,
             'agama' => $initialWarga->agama,
-            'status_perkawinan' => $initialWarga->status_perkawinan,
             'pekerjaan' => $initialWarga->pekerjaan,
-            'alamat_lengkap' => $initialWarga->alamat . ($initialWarga->rt || $initialWarga->rw ? " (RT {$initialWarga->rt} / RW {$initialWarga->rw})" : ''),
+            'status_perkawinan' => $initialWarga->status_perkawinan,
+            'alamat' => $initialWarga->alamat,
+            'rt' => $initialWarga->rt ?? '-',
+            'rw' => $initialWarga->rw ?? '-',
         ];
     }
+
+    $BULAN = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+    ];
+    $todayStr = date('j') . ' ' . ($BULAN[(int)date('n')] ?? date('F')) . ' ' . date('Y');
 @endphp
 
-<x-card :padded="false">
-    <div class="space-y-8 p-5 sm:p-6" x-data="suratForm({
-        jenisList: @js($jenisSuratList),
-        jenisTerpilihId: @js($jenisTerpilih),
-        wargaDataAwal: @js($wargaData),
-        nomorEksis: @js($nomorSuratEksis ?? null),
-        nextUrut: @js($nextNomorUrut ?? '01'),
-        tahun: @js($tahun ?? date('Y')),
-        cariUrl: @js(route('warga.cari')),
-        isianAwal: @js(old('data_isian', $isianAwal ?? [])),
-        galatIsian: @js($isianErrors)
-    })">
+<div x-data="suratBuilder({
+    searchUrl: @js(route('warga.cari')),
+    jenis: @js($jenisSuratList),
+    jenisId: @js((int) old('jenis_surat_id', $jenisTerpilihId ?? ($jenisSuratList->first()->id ?? 1))),
+    intro: @js($intro),
+    today: @js($todayStr),
+    isian: @js(old('data_isian', $isianAwal ?? [])),
+    warga: @js($initialWargaData),
+})" class="space-y-6">
 
-        {{-- LANGKAH 1: PILIH JENIS SURAT & NOMOR SURAT OTOMATIS --}}
-        <section aria-labelledby="langkah-1" class="space-y-4">
-            <div class="flex items-center justify-between border-b border-line pb-2">
-                <h2 id="langkah-1" class="text-base font-semibold text-ink-900 flex items-center gap-2">
-                    <span class="flex size-6 items-center justify-center rounded-full bg-brand-700 text-xs font-bold text-white">1</span>
-                    <span>Pilih Jenis Surat &amp; Nomor Surat</span>
-                </h2>
-            </div>
+    {{-- Hidden Input untuk Form Submission --}}
+    <input type="hidden" name="warga_id" :value="warga ? warga.id : ''" required>
+    <input type="hidden" name="jenis_surat_id" :value="jenisId" required>
 
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {{-- Dropdown Jenis Surat --}}
-                <div class="space-y-1.5">
-                    <label for="jenis_surat_id" class="block text-sm font-medium text-ink-900">
-                        Jenis Surat <span class="font-normal text-danger-700">(wajib)</span>
-                    </label>
-                    <select id="jenis_surat_id" name="jenis_surat_id"
-                            x-model="selectedJenisId"
-                            @change="onJenisChange()"
-                            required
-                            class="field">
-                        <option value="">-- Pilih Jenis Surat --</option>
-                        @foreach($jenisSuratList as $j)
-                        <option value="{{ $j->id }}" @selected($jenisTerpilih == $j->id)>
-                            {{ $j->nama_jenis }} ({{ $j->kode }})
-                        </option>
-                        @endforeach
-                    </select>
-                    <template x-if="selectedJenis">
-                        <p class="text-xs text-ink-600 mt-1" x-text="selectedJenis.deskripsi"></p>
-                    </template>
-                </div>
+    {{-- KARTU 1: PILIH JENIS SURAT --}}
+    <x-card>
+        <div class="space-y-1.5">
+            <label for="pilih_jenis_surat" class="block text-sm font-medium text-ink-900">
+                Jenis surat <span class="font-normal text-danger-700">(wajib)</span>
+            </label>
+            <select id="pilih_jenis_surat" x-model.number="jenisId" class="field">
+                @foreach($jenisSuratList as $j)
+                <option value="{{ $j->id }}">{{ $j->nama_jenis }} ({{ $j->kode }})</option>
+                @endforeach
+            </select>
+            <p class="text-xs text-ink-600 mt-1" x-text="jenis?.deskripsi"></p>
+        </div>
+    </x-card>
 
-                {{-- Nomor Surat Otomatis --}}
-                <div class="space-y-1.5">
-                    <label for="nomor_surat_preview" class="block text-sm font-medium text-ink-900 flex items-center justify-between">
-                        <span>Nomor Surat</span>
-                        <span class="inline-flex items-center gap-1 rounded bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700 border border-brand-200">
-                            <x-icon name="check" class="size-3"/> Otomatis
-                        </span>
-                    </label>
-                    <div class="relative">
-                        <input type="text" id="nomor_surat_preview" readonly
-                               :value="nomorSuratDisplay"
-                               class="field bg-canvas font-mono font-semibold text-ink-900 cursor-not-allowed">
-                    </div>
-                    <p class="text-xs text-ink-500">Nomor registrasi resmi yang digenerate otomatis berdasarkan format Desa Tanjung Selamat.</p>
+    {{-- KARTU 2: KERTAS SURAT RESMI (LIVE SHEET EDITOR) --}}
+    <div class="rounded-card border border-line bg-surface p-6 sm:p-10 shadow-sm space-y-6">
+
+        {{-- KOP SURAT RESMI --}}
+        <div class="relative pb-4 border-b-[3px] border-double border-ink-900 text-center font-serif text-ink-900">
+            {{-- Logo / Lambang Desa Lingkaran di Kiri --}}
+            <div class="sm:absolute sm:left-2 sm:top-1 flex justify-center mb-2 sm:mb-0">
+                <div class="size-16 sm:size-20 rounded-full border-2 border-ink-900 flex items-center justify-center p-2 text-ink-900">
+                    <svg class="size-10 sm:size-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
                 </div>
             </div>
-        </section>
 
-        {{-- LANGKAH 2: INPUT NIK & DATA WARGA OTOMATIS --}}
-        <section aria-labelledby="langkah-2" class="space-y-4 border-t border-line pt-6">
-            <div class="flex items-center justify-between border-b border-line pb-2">
-                <h2 id="langkah-2" class="text-base font-semibold text-ink-900 flex items-center gap-2">
-                    <span class="flex size-6 items-center justify-center rounded-full bg-brand-700 text-xs font-bold text-white">2</span>
-                    <span>Data Warga Pemohon (Input NIK)</span>
-                </h2>
-                <a href="{{ route('warga.create') }}" target="_blank" class="text-xs font-semibold text-brand-600 hover:text-brand-900 inline-flex items-center gap-1">
-                    <x-icon name="user-plus" class="size-3.5"/> + Daftarkan Warga Baru
+            <div class="sm:px-20 leading-tight">
+                <h4 class="text-xs sm:text-sm font-bold tracking-wider uppercase">PEMERINTAH KABUPATEN DELI SERDANG</h4>
+                <h3 class="text-sm sm:text-base font-bold tracking-wider uppercase mt-0.5">KECAMATAN SUNGGAL</h3>
+                <h2 class="text-base sm:text-lg font-extrabold tracking-wider uppercase mt-0.5">KANTOR KEPALA DESA TANJUNG SELAMAT</h2>
+                <p class="text-[10px] sm:text-xs italic text-ink-700 mt-1">
+                    Jl. Tanjung Selamat No. 1, Kec. Sunggal, Kab. Deli Serdang &bull; Kode Pos 20353
+                </p>
+            </div>
+        </div>
+
+        {{-- JUDUL & NOMOR SURAT --}}
+        <div class="text-center font-serif my-4">
+            <h1 class="text-base sm:text-lg font-bold uppercase underline tracking-wide" x-text="jenis?.nama_jenis"></h1>
+            <p class="text-xs italic text-ink-600 mt-0.5">Nomor : {{ $nomorSuratEksis ?? 'dibuat otomatis saat surat disimpan' }}</p>
+        </div>
+
+        {{-- PARAGRAF PEMBUKA --}}
+        <p class="font-serif text-justify text-sm sm:text-[15px] leading-relaxed indent-8 text-ink-900">
+            Yang bertanda tangan di bawah ini, Kepala Desa Tanjung Selamat, Kecamatan Sunggal, Kabupaten Deli Serdang, Provinsi Sumatera Utara, dengan ini menerangkan bahwa:
+        </p>
+
+        {{-- BANNER STATUS WARGA (DALAM SURAT) --}}
+        <div class="rounded-control border border-brand-200 bg-brand-50/70 px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm font-sans">
+            <div class="flex items-center gap-2">
+                <template x-if="warga">
+                    <span class="inline-flex items-center gap-1.5 font-semibold text-emerald-700">
+                        <span class="size-2 rounded-full bg-emerald-500"></span>
+                        Data warga terisi dari database
+                    </span>
+                </template>
+                <template x-if="!warga">
+                    <span class="text-ink-600">
+                        Ketik Nama, NIK, atau No. KK di bawah untuk memilih data warga:
+                    </span>
+                </template>
+            </div>
+            <div class="flex items-center gap-3">
+                <template x-if="warga">
+                    <button type="button" @click="clearWarga()" class="btn btn-secondary btn-sm text-xs">
+                        Ganti warga
+                    </button>
+                </template>
+                <a href="{{ route('warga.create') }}" target="_blank" class="text-xs font-semibold text-brand-700 underline hover:text-brand-900">
+                    Warga belum terdaftar? Daftarkan
                 </a>
             </div>
+        </div>
 
-            {{-- Hidden input warga_id untuk submit form --}}
-            <input type="hidden" name="warga_id" :value="selectedWarga ? selectedWarga.id : ''" required>
+        {{-- PESAN ERROR JIKA WARGA BELUM DIPILIH SAAT SUBMIT --}}
+        <template x-if="error">
+            <div class="rounded-control border border-danger-300 bg-danger-50 p-3 text-xs sm:text-sm text-danger-800 flex items-center gap-2">
+                <x-icon name="exclamation" class="size-4 shrink-0 text-danger-700"/>
+                <span x-text="error"></span>
+            </div>
+        </template>
 
-            {{-- Input NIK / Pencarian --}}
-            <div class="space-y-3">
-                <div>
-                    <label for="input-nik" class="block text-sm font-medium text-ink-900">
-                        Nomor Induk Kependudukan (NIK) <span class="font-normal text-danger-700">(wajib 16 digit)</span>
+        {{-- FORM INPUT IDENTITAS WARGA (LANGSUNG DI FORMAT BARIS SURAT) --}}
+        <div class="space-y-2.5 font-serif text-sm sm:text-[15px] text-ink-900">
+            {{-- 3 Kolom Input Langsung: Nama, NIK, No. KK --}}
+            <template x-for="fld in searchFields" :key="fld.key">
+                <div class="relative flex flex-col sm:flex-row sm:items-center gap-2">
+                    <label :for="'f-' + fld.key" class="w-44 sm:w-52 shrink-0 flex items-center justify-between">
+                        <span x-text="fld.label"></span>
+                        <span class="hidden sm:inline">:</span>
                     </label>
-                    <div class="relative mt-1.5 flex gap-2">
-                        <div class="relative flex-1">
-                            <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-600"/>
-                            <input type="text" id="input-nik"
-                                   x-ref="nikInput"
-                                   x-model="nikQuery"
-                                   @input="onNikInput()"
-                                   @keydown.enter.prevent="cariByNik()"
-                                   maxlength="16"
-                                   inputmode="numeric"
-                                   placeholder="Ketik 16 digit NIK warga (atau ketik nama untuk mencari)..."
-                                   :class="{'border-danger-700 ring-danger-700': errorWarga}"
-                                   class="field pl-10 font-mono tracking-wide">
+                    <div class="relative flex-1 font-sans">
+                        <input :type="fld.key === 'nama' ? 'text' : 'text'"
+                               :id="'f-' + fld.key"
+                               :name="fld.key"
+                               :inputmode="fld.inputmode"
+                               :maxlength="fld.maxlength"
+                               :value="form[fld.key]"
+                               :placeholder="fld.placeholder"
+                               @input="onInput(fld.key, $el)"
+                               @keydown.arrow-down.prevent="move(1)"
+                               @keydown.arrow-up.prevent="move(-1)"
+                               @keydown.enter.prevent="choose()"
+                               class="field bg-white font-medium">
 
-                            {{-- Autocomplete dropdown saat mencari --}}
-                            <div x-show="autocompleteOpen && searchResults.length > 0"
-                                 @click.outside="autocompleteOpen = false"
-                                 x-cloak
-                                 class="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-control border border-line bg-surface shadow-xl">
-                                <ul class="divide-y divide-line text-sm">
-                                    <template x-for="r in searchResults" :key="r.id">
-                                        <li @click="pilihWarga(r)"
-                                            class="cursor-pointer px-4 py-2.5 hover:bg-brand-50 transition-colors">
-                                            <div class="flex items-center justify-between">
-                                                <p class="font-semibold text-ink-900" x-text="r.nama"></p>
-                                                <span class="font-mono text-xs text-ink-600" x-text="r.nik"></span>
-                                            </div>
-                                            <p class="text-xs text-ink-500 mt-0.5">
-                                                <span x-text="r.pekerjaan || '-'"></span> &bull; <span x-text="r.alamat_lengkap"></span>
-                                            </p>
-                                        </li>
-                                    </template>
-                                </ul>
-                            </div>
+                        {{-- Dropdown Autocomplete Pencarian Warga --}}
+                        <div x-show="open && activeField === fld.key && results.length > 0"
+                             @click.outside="open = false"
+                             x-cloak
+                             class="absolute left-0 top-full z-30 mt-1 max-h-56 w-full overflow-auto rounded-control border border-line bg-surface shadow-xl text-left">
+                            <ul class="divide-y divide-line text-xs sm:text-sm">
+                                <template x-for="(r, idx) in results" :key="r.id">
+                                    <li :id="'warga-opt-' + idx"
+                                        @click="pick(r)"
+                                        :class="{'bg-brand-50 text-brand-900 font-semibold': active === idx, 'hover:bg-canvas': active !== idx}"
+                                        class="cursor-pointer px-4 py-2.5 transition-colors">
+                                        <div class="flex items-center justify-between">
+                                            <span x-text="r.nama"></span>
+                                            <span class="font-mono text-xs text-ink-600" x-text="mask(r.nik)"></span>
+                                        </div>
+                                        <p class="text-xs text-ink-500 font-normal mt-0.5" x-text="r.alamat_lengkap || r.alamat"></p>
+                                    </li>
+                                </template>
+                            </ul>
                         </div>
 
-                        <button type="button" @click="cariByNik()" :disabled="loadingWarga" class="btn btn-secondary shrink-0">
-                            <template x-if="!loadingWarga">
-                                <span>Cek NIK</span>
-                            </template>
-                            <template x-if="loadingWarga">
-                                <span class="flex items-center gap-1.5 text-xs">
-                                    <svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-                                    Mengecek...
-                                </span>
-                            </template>
-                        </button>
-                    </div>
-
-                    <p class="mt-1.5 text-xs text-ink-500">
-                        Ketik 16 digit NIK sesuai KTP, data warga akan terdeteksi dan terisi otomatis ke formulir di bawah.
-                    </p>
-                </div>
-
-                {{-- Status Pesan Error jika NIK tidak ditemukan --}}
-                <template x-if="errorWarga">
-                    <div class="rounded-control border border-danger-200 bg-danger-50 p-3.5 text-sm text-danger-800 flex items-start gap-2.5">
-                        <x-icon name="exclamation" class="size-5 shrink-0 text-danger-700 mt-0.5"/>
-                        <div class="flex-1">
-                            <p class="font-semibold" x-text="errorWarga"></p>
-                            <p class="mt-1 text-xs text-danger-700">
-                                Pastikan 16 digit NIK sudah sesuai KTP warga. Jika belum terdaftar, silakan tambahkan data warga terlebih dahulu.
-                            </p>
-                            <a href="{{ route('warga.create') }}" target="_blank" class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-700 underline hover:text-brand-900">
-                                <x-icon name="user-plus" class="size-3.5"/> Daftarkan Warga Baru Sekarang &rarr;
-                            </a>
+                        {{-- Status Searching/Empty --}}
+                        <div x-show="loading && activeField === fld.key" x-cloak class="absolute right-3 top-2.5">
+                            <svg class="size-4 animate-spin text-brand-600" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                         </div>
                     </div>
-                </template>
-
-                @if($serverErrorWarga)
-                <p class="text-sm font-medium text-danger-700">{{ $serverErrorWarga }}</p>
-                @endif
-
-                {{-- PANEL DATA WARGA OTOMATIS (MUNCUL OTOMATIS KETIKA NIK DITEMUKAN) --}}
-                <div x-show="selectedWarga" x-cloak class="rounded-control border border-emerald-200 bg-emerald-50/50 p-4.5 sm:p-5 transition-all">
-                    <div class="flex items-start justify-between gap-3 border-b border-emerald-200/80 pb-3">
-                        <div class="flex items-center gap-2">
-                            <span class="flex size-7 items-center justify-center rounded-full bg-emerald-600 text-white">
-                                <x-icon name="check" class="size-4"/>
-                            </span>
-                            <div>
-                                <span class="text-xs font-semibold text-emerald-800 uppercase tracking-wider block">Data Warga Ditemukan (Otomatis)</span>
-                                <h3 class="text-base font-bold text-ink-900" x-text="selectedWarga ? selectedWarga.nama : ''"></h3>
-                            </div>
-                        </div>
-                        <button type="button" @click="resetWarga()" class="btn btn-secondary btn-sm text-xs">
-                            Ganti Warga
-                        </button>
-                    </div>
-
-                    <dl class="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3 text-sm">
-                        <div>
-                            <dt class="text-xs text-ink-600">NIK (KTP)</dt>
-                            <dd class="font-mono font-semibold text-ink-900" x-text="selectedWarga ? selectedWarga.nik : ''"></dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-ink-600">Nomor Kartu Keluarga (KK)</dt>
-                            <dd class="font-mono text-ink-900" x-text="(selectedWarga && selectedWarga.no_kk) ? selectedWarga.no_kk : '-'"></dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-ink-600">Tempat, Tanggal Lahir</dt>
-                            <dd class="font-medium text-ink-900" x-text="selectedWarga ? selectedWarga.ttl : ''"></dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-ink-600">Jenis Kelamin</dt>
-                            <dd class="text-ink-900" x-text="selectedWarga ? selectedWarga.jenis_kelamin : ''"></dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-ink-600">Agama &amp; Status</dt>
-                            <dd class="text-ink-900">
-                                <span x-text="selectedWarga ? selectedWarga.agama : ''"></span> &bull; 
-                                <span x-text="selectedWarga ? selectedWarga.status_perkawinan : ''"></span>
-                            </dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs text-ink-600">Pekerjaan</dt>
-                            <dd class="text-ink-900" x-text="(selectedWarga && selectedWarga.pekerjaan) ? selectedWarga.pekerjaan : '-'"></dd>
-                        </div>
-                        <div class="sm:col-span-2 lg:col-span-3">
-                            <dt class="text-xs text-ink-600">Alamat Lengkap</dt>
-                            <dd class="text-ink-900 font-medium" x-text="selectedWarga ? selectedWarga.alamat_lengkap : ''"></dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
-        </section>
-
-        {{-- LANGKAH 3: TEMPLATE DATA ISIAN KHUSUS SURAT --}}
-        <section aria-labelledby="langkah-3" class="space-y-4 border-t border-line pt-6">
-            <div class="flex items-center justify-between border-b border-line pb-2">
-                <h2 id="langkah-3" class="text-base font-semibold text-ink-900 flex items-center gap-2">
-                    <span class="flex size-6 items-center justify-center rounded-full bg-brand-700 text-xs font-bold text-white">3</span>
-                    <span>Template Formulir Isian Surat</span>
-                </h2>
-                <template x-if="selectedJenis">
-                    <span class="text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 px-2.5 py-0.5 rounded-full"
-                          x-text="'Template: ' + selectedJenis.nama_jenis"></span>
-                </template>
-            </div>
-
-            <template x-if="!selectedJenis">
-                <div class="rounded-control border border-dashed border-line bg-canvas/60 p-6 text-center text-ink-600 text-sm">
-                    <x-icon name="building" class="size-8 mx-auto text-ink-400 mb-2"/>
-                    <p class="font-semibold text-ink-800">Silakan pilih Jenis Surat di Langkah 1 terlebih dahulu</p>
-                    <p class="text-xs text-ink-500 mt-1">Formulir isian khusus akan muncul secara otomatis sesuai template jenis surat yang dipilih.</p>
                 </div>
             </template>
 
-            <div id="isian-container" class="space-y-5" aria-live="polite"></div>
-        </section>
+            {{-- Baris Data Otomatis dengan Garis Titik-Titik Bawah --}}
+            <template x-for="row in autoRows" :key="row.label">
+                <div class="flex items-baseline gap-2 py-0.5">
+                    <span class="w-44 sm:w-52 shrink-0 flex items-center justify-between">
+                        <span x-text="row.label"></span>
+                        <span>:</span>
+                    </span>
+                    <span class="flex-1 border-b border-dotted border-ink-400 text-ink-900 pb-0.5 min-h-[1.5rem]"
+                          x-text="row.value || ''"></span>
+                </div>
+            </template>
+        </div>
+
+        {{-- PARAGRAF KETERANGAN DINAMIS SESUAI JENIS SURAT --}}
+        <p class="font-serif text-justify text-sm sm:text-[15px] leading-relaxed my-4 text-ink-900">
+            <template x-for="(part, pIdx) in introParts" :key="pIdx">
+                <span :class="{'font-bold': part.b}" x-text="part.t"></span>
+            </template>
+        </p>
+
+        {{-- FORM ISIAN KHUSUS SURAT (TEMPLATE FIELDS) LANGSUNG DI BADAN SURAT --}}
+        <div class="space-y-3 my-4 font-serif text-ink-900">
+            <template x-for="f in fields" :key="f.key">
+                <div class="flex flex-col sm:flex-row sm:items-start gap-2 text-sm sm:text-[15px]">
+                    <label :for="'field-' + f.key" class="w-56 shrink-0 pt-2 font-medium">
+                        &bull; <span x-text="f.label"></span> :
+                    </label>
+                    <div class="flex-1 font-sans">
+                        <template x-if="f.type === 'textarea'">
+                            <textarea :id="'field-' + f.key"
+                                      :name="'data_isian[' + f.key + ']'"
+                                      x-model="isian[f.key]"
+                                      :placeholder="f.placeholder || ''"
+                                      rows="3"
+                                      required
+                                      class="field bg-white"></textarea>
+                        </template>
+                        <template x-if="f.type !== 'textarea'">
+                            <input :type="f.type || 'text'"
+                                   :id="'field-' + f.key"
+                                   :name="'data_isian[' + f.key + ']'"
+                                   x-model="isian[f.key]"
+                                   :placeholder="f.placeholder || ''"
+                                   required
+                                   class="field bg-white">
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        {{-- PARAGRAF PENUTUP --}}
+        <p class="font-serif text-justify text-sm sm:text-[15px] leading-relaxed indent-8 my-4 text-ink-900">
+            Demikian surat keterangan ini kami perbuat dengan sebenarnya agar dapat dipergunakan sebagaimana mestinya oleh yang berkepentingan.
+        </p>
+
+        {{-- KOLOM TANDA TANGAN KEPALA DESA --}}
+        <div class="flex justify-end pt-4 font-serif">
+            <div class="w-64 sm:w-72 text-center text-sm sm:text-[15px] space-y-1">
+                <p>Tanjung Selamat, <span x-text="today"></span></p>
+                <p class="font-bold uppercase tracking-wide">KEPALA DESA TANJUNG SELAMAT</p>
+                <div class="my-3 rounded-control border border-dashed border-ink-400 p-4 font-sans text-xs text-ink-600 bg-canvas/40 min-h-[85px] flex items-center justify-center">
+                    Tanda tangan digital dan QR terbit setelah surat disetujui Kepala Desa
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    {{-- Tombol Tindakan Form --}}
-    <div class="flex flex-col-reverse gap-2 border-t border-line rounded-b-card bg-canvas px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    {{-- KARTU 3: TOMBOL TINDAKAN (BATAL, SIMPAN SEBAGAI DRAF, AJUKAN KE KADES) --}}
+    <div class="flex flex-col-reverse gap-3 rounded-card border border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <x-button variant="ghost" href="{{ $batalUrl }}">Batal</x-button>
         <div class="flex flex-col gap-2 sm:flex-row">
             <button type="submit" name="action" value="draft" class="btn btn-secondary">Simpan sebagai draf</button>
-            <button type="submit" name="action" value="ajukan" class="btn btn-primary">
-                Ajukan ke Kades <x-icon name="arrow-right" class="size-4"/>
+            <button type="submit" name="action" value="ajukan" class="btn btn-primary flex items-center gap-2">
+                <span>Ajukan ke Kades</span>
+                <span class="flex size-4 items-center justify-center rounded-full border border-current text-[10px]">&#9658;</span>
             </button>
         </div>
     </div>
-</x-card>
-
-<script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('suratForm', (cfg) => ({
-        jenisList: cfg.jenisList || [],
-        selectedJenisId: cfg.jenisTerpilihId ? String(cfg.jenisTerpilihId) : '',
-        selectedJenis: null,
-        nomorEksis: cfg.nomorEksis,
-        nextUrut: cfg.nextUrut,
-        tahun: cfg.tahun,
-        cariUrl: cfg.cariUrl,
-        selectedWarga: cfg.wargaDataAwal || null,
-        nikQuery: (cfg.wargaDataAwal && cfg.wargaDataAwal.nik) ? cfg.wargaDataAwal.nik : '',
-        loadingWarga: false,
-        errorWarga: '',
-        autocompleteOpen: false,
-        searchResults: [],
-        searchTimer: null,
-        cacheIsian: Object.assign({}, cfg.isianAwal || {}),
-        galatIsian: cfg.galatIsian || {},
-
-        init() {
-            if (this.selectedJenisId) {
-                this.updateSelectedJenis();
-            }
-            this.$nextTick(() => {
-                this.renderTemplateFields();
-            });
-
-            // Validasi client-side sebelum submit
-            const form = this.$el.closest('form');
-            if (form) {
-                form.addEventListener('submit', (e) => {
-                    if (!this.selectedWarga) {
-                        e.preventDefault();
-                        this.errorWarga = 'Warga pemohon belum dipilih. Masukkan NIK warga yang valid.';
-                        this.$refs.nikInput && this.$refs.nikInput.focus();
-                        return;
-                    }
-                    if (!this.selectedJenisId) {
-                        e.preventDefault();
-                        alert('Silakan pilih jenis surat terlebih dahulu.');
-                        document.getElementById('jenis_surat_id').focus();
-                        return;
-                    }
-                });
-            }
-        },
-
-        get nomorSuratDisplay() {
-            if (this.nomorEksis) {
-                return this.nomorEksis;
-            }
-            const kode = this.selectedJenis ? this.selectedJenis.kode : '___';
-            return `470/${this.nextUrut}/${kode}/TS/${this.tahun}`;
-        },
-
-        onJenisChange() {
-            this.updateSelectedJenis();
-            this.renderTemplateFields();
-        },
-
-        updateSelectedJenis() {
-            this.selectedJenis = this.jenisList.find(j => String(j.id) === String(this.selectedJenisId)) || null;
-        },
-
-        onNikInput() {
-            this.errorWarga = '';
-            const q = this.nikQuery.trim();
-
-            // Jika pas 16 digit angka, langsung picu pengecekan otomatis
-            if (/^\d{16}$/.test(q)) {
-                this.autocompleteOpen = false;
-                this.cariByNik();
-                return;
-            }
-
-            // Jika kurang dari 16 digit tetapi minimal 2 karakter, berikan autocomplete
-            clearTimeout(this.searchTimer);
-            if (q.length >= 2) {
-                this.searchTimer = setTimeout(() => {
-                    this.fetchAutocomplete(q);
-                }, 300);
-            } else {
-                this.searchResults = [];
-                this.autocompleteOpen = false;
-            }
-        },
-
-        async cariByNik() {
-            const nik = this.nikQuery.trim();
-            if (!nik) {
-                this.errorWarga = 'Silakan masukkan 16 digit NIK terlebih dahulu.';
-                return;
-            }
-            this.loadingWarga = true;
-            this.errorWarga = '';
-            this.autocompleteOpen = false;
-
-            try {
-                const res = await fetch(`${this.cariUrl}?nik=${encodeURIComponent(nik)}`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                const data = await res.json();
-                if (data.found && data.warga) {
-                    this.pilihWarga(data.warga);
-                } else {
-                    // Coba fallback pencarian fleksibel jika user input nama / sebagian
-                    const fallbackRes = await fetch(`${this.cariUrl}?q=${encodeURIComponent(nik)}`, {
-                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                    });
-                    const fallbackData = await fallbackRes.json();
-                    if (Array.isArray(fallbackData) && fallbackData.length === 1) {
-                        this.pilihWarga(fallbackData[0]);
-                    } else if (Array.isArray(fallbackData) && fallbackData.length > 1) {
-                        this.searchResults = fallbackData;
-                        this.autocompleteOpen = true;
-                    } else {
-                        this.selectedWarga = null;
-                        this.errorWarga = `NIK / Warga "${nik}" tidak ditemukan dalam database.`;
-                    }
-                }
-            } catch (err) {
-                this.errorWarga = 'Terjadi kesalahan saat memeriksa data warga. Periksa koneksi Anda.';
-            } finally {
-                this.loadingWarga = false;
-            }
-        },
-
-        async fetchAutocomplete(q) {
-            try {
-                const res = await fetch(`${this.cariUrl}?q=${encodeURIComponent(q)}`, {
-                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                const data = await res.json();
-                this.searchResults = Array.isArray(data) ? data : [];
-                this.autocompleteOpen = this.searchResults.length > 0;
-            } catch (e) {
-                this.searchResults = [];
-            }
-        },
-
-        pilihWarga(w) {
-            this.selectedWarga = w;
-            this.nikQuery = w.nik || w.nik_masked || '';
-            this.autocompleteOpen = false;
-            this.errorWarga = '';
-        },
-
-        resetWarga() {
-            this.selectedWarga = null;
-            this.nikQuery = '';
-            this.$nextTick(() => {
-                this.$refs.nikInput && this.$refs.nikInput.focus();
-            });
-        },
-
-        simpanNilaiIsian() {
-            const container = document.getElementById('isian-container');
-            if (container) {
-                container.querySelectorAll('[data-key]').forEach((el) => {
-                    this.cacheIsian[el.dataset.key] = el.value;
-                });
-            }
-        },
-
-        renderTemplateFields() {
-            const container = document.getElementById('isian-container');
-            if (!container) return;
-
-            this.simpanNilaiIsian();
-            container.replaceChildren();
-
-            if (!this.selectedJenis) {
-                return;
-            }
-
-            const fields = Array.isArray(this.selectedJenis.template_field) ? this.selectedJenis.template_field : [];
-
-            if (!fields.length) {
-                const p = document.createElement('p');
-                p.className = 'text-sm text-ink-600 bg-canvas p-4 rounded-control border border-line';
-                p.textContent = 'Tidak ada formulir isian khusus tambahan untuk jenis surat ini.';
-                container.appendChild(p);
-                return;
-            }
-
-            fields.forEach((f) => {
-                const id = 'isian-' + f.key;
-                const wrap = document.createElement('div');
-                wrap.className = 'space-y-1.5';
-
-                const label = document.createElement('label');
-                label.htmlFor = id;
-                label.className = 'block text-sm font-medium text-ink-900';
-                label.textContent = f.label + ' ';
-                const wajib = document.createElement('span');
-                wajib.className = 'font-normal text-danger-700';
-                wajib.textContent = '(wajib)';
-                label.appendChild(wajib);
-
-                const input = f.type === 'textarea' ? document.createElement('textarea') : document.createElement('input');
-                if (f.type === 'textarea') {
-                    input.rows = 3;
-                } else {
-                    input.type = f.type || 'text';
-                }
-                input.id = id;
-                input.name = 'data_isian[' + f.key + ']';
-                input.required = true;
-                input.className = 'field';
-                input.placeholder = f.placeholder || '';
-                input.dataset.key = f.key;
-                if (this.cacheIsian[f.key] !== undefined && this.cacheIsian[f.key] !== null) {
-                    input.value = this.cacheIsian[f.key];
-                }
-
-                wrap.append(label, input);
-
-                const pesan = this.galatIsian['data_isian.' + f.key];
-                if (pesan) {
-                    input.setAttribute('aria-invalid', 'true');
-                    input.setAttribute('aria-describedby', id + '-error');
-                    const err = document.createElement('p');
-                    err.id = id + '-error';
-                    err.className = 'text-sm font-medium text-danger-700';
-                    err.textContent = pesan;
-                    wrap.appendChild(err);
-                }
-                container.appendChild(wrap);
-            });
-        }
-    }));
-});
-</script>
+</div>
