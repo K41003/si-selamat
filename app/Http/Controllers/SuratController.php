@@ -141,6 +141,7 @@ class SuratController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'nomor_surat' => ['required', 'string', 'max:255', 'unique:surat,nomor_surat'],
             'warga_id' => ['required', 'exists:warga,id'],
             'jenis_surat_id' => ['required', 'exists:jenis_surat,id'],
             'action' => ['required', 'in:draft,ajukan'],
@@ -152,7 +153,7 @@ class SuratController extends Controller
         $warga = Warga::findOrFail($request->warga_id);
 
         $status = $request->action === 'ajukan' ? 'diajukan' : 'draft';
-        $nomorSurat = Surat::generateNomorSurat($jenis->kode);
+        $nomorSurat = trim($request->nomor_surat);
 
         $creatorName = $user->isStaff() && $user->active_staff_name
             ? "{$user->active_staff_name} (Staff Pelayanan)"
@@ -212,6 +213,7 @@ class SuratController extends Controller
         }
 
         $request->validate([
+            'nomor_surat' => ['required', 'string', 'max:255', 'unique:surat,nomor_surat,' . $surat->id],
             'warga_id' => ['required', 'exists:warga,id'],
             'jenis_surat_id' => ['required', 'exists:jenis_surat,id'],
             'action' => ['required', 'in:draft,ajukan'],
@@ -225,6 +227,7 @@ class SuratController extends Controller
         $status = $request->action === 'ajukan' ? 'diajukan' : 'draft';
 
         $surat->update([
+            'nomor_surat' => trim($request->nomor_surat),
             'warga_id' => $warga->id,
             'jenis_surat_id' => $jenis->id,
             'status' => $status,

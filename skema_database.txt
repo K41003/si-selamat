@@ -1,0 +1,150 @@
+================================================================================
+                    SKEMA DATABASE: SI-SELAMAT
+        (Sistem Informasi Pelayanan Surat Administrasi Terpadu)
+================================================================================
+
+1. TABEL: users
+Deskripsi: Menyimpan data akun pengguna sistem (Staff, Kepala Desa/Kades).
+--------------------------------------------------------------------------------
+No | Kolom              | Tipe Data                  | Keterangan
+---+--------------------+----------------------------+--------------------------
+1  | id                 | BIGINT UNSIGNED (PK, AI)   | Primary Key
+2  | name               | VARCHAR(255)               | Nama lengkap akun
+3  | username           | VARCHAR(255) (UNIQUE)      | Username login
+4  | email              | VARCHAR(255) (NULLABLE)    | Alamat email
+5  | password           | VARCHAR(255)               | Password hash
+6  | role               | ENUM('staff', 'kades')     | Role akun (default: 'staff')
+7  | active_staff_name  | VARCHAR(255) (NULLABLE)    | Nama staf yang aktif
+8  | is_active          | BOOLEAN                    | Status aktif akun (default: true)
+9  | remember_token     | VARCHAR(100) (NULLABLE)    | Token remember me Laravel
+10 | created_at         | TIMESTAMP (NULLABLE)       | Waktu data dibuat
+11 | updated_at         | TIMESTAMP (NULLABLE)       | Waktu data diperbarui
+
+
+2. TABEL: warga
+Deskripsi: Menyimpan data kependudukan warga desa.
+--------------------------------------------------------------------------------
+No | Kolom              | Tipe Data                  | Keterangan
+---+--------------------+----------------------------+--------------------------
+1  | id                 | BIGINT UNSIGNED (PK, AI)   | Primary Key
+2  | nik                | VARCHAR(16) (UNIQUE)       | Nomor Induk Kependudukan
+3  | no_kk              | VARCHAR(16)                | Nomor Kartu Keluarga
+4  | nama               | VARCHAR(255)               | Nama lengkap warga
+5  | tempat_lahir       | VARCHAR(255)               | Tempat lahir
+6  | tanggal_lahir      | DATE                       | Tanggal lahir
+7  | jenis_kelamin      | ENUM('Laki-laki',          | Jenis kelamin
+   |                    |      'Perempuan')          |
+8  | agama              | VARCHAR(255)               | Agama
+9  | pekerjaan          | VARCHAR(255)               | Pekerjaan
+10 | status_perkawinan  | ENUM('Belum Kawin',        | Status perkawinan
+   |                    |      'Kawin',              |
+   |                    |      'Cerai Hidup',        |
+   |                    |      'Cerai Mati')         |
+11 | alamat             | TEXT                       | Alamat domisili lengkap
+12 | rt                 | VARCHAR(10) (NULLABLE)     | Nomor RT
+13 | rw                 | VARCHAR(10) (NULLABLE)     | Nomor RW
+14 | no_hp              | VARCHAR(20) (NULLABLE)     | Nomor telepon / HP
+15 | created_at         | TIMESTAMP (NULLABLE)       | Waktu data dibuat
+16 | updated_at         | TIMESTAMP (NULLABLE)       | Waktu data diperbarui
+
+
+3. TABEL: jenis_surat
+Deskripsi: Menyimpan jenis-jenis surat layanan administrasi beserta konfigurasinya.
+--------------------------------------------------------------------------------
+No | Kolom              | Tipe Data                  | Keterangan
+---+--------------------+----------------------------+--------------------------
+1  | id                 | BIGINT UNSIGNED (PK, AI)   | Primary Key
+2  | kode               | VARCHAR(10) (UNIQUE)       | Kode surat (cth: SKU, SKD)
+3  | nama_jenis         | VARCHAR(255)               | Nama jenis surat
+4  | deskripsi          | TEXT (NULLABLE)            | Deskripsi surat
+5  | template_field     | JSON (NULLABLE)            | Skema form dinamis surat
+6  | is_active          | BOOLEAN                    | Status aktif (default: true)
+7  | created_at         | TIMESTAMP (NULLABLE)       | Waktu data dibuat
+8  | updated_at         | TIMESTAMP (NULLABLE)       | Waktu data diperbarui
+
+
+4. TABEL: surat
+Deskripsi: Menyimpan data pengajuan dan penerbitan surat warga.
+--------------------------------------------------------------------------------
+No | Kolom              | Tipe Data                  | Keterangan
+---+--------------------+----------------------------+--------------------------
+1  | id                 | BIGINT UNSIGNED (PK, AI)   | Primary Key
+2  | nomor_surat        | VARCHAR(255) (UNIQUE)      | Nomor resmi surat
+3  | warga_id           | BIGINT UNSIGNED (FK)       | FK -> warga.id (ON DELETE CASCADE)
+4  | jenis_surat_id     | BIGINT UNSIGNED (FK)       | FK -> jenis_surat.id
+5  | status             | ENUM('draft', 'diajukan',  | Status alur surat
+   |                    |      'disetujui', 'ditolak')| (default: 'draft')
+6  | data_isian         | JSON (NULLABLE)            | Nilai input field form surat
+7  | tanggal_pengajuan  | DATE (NULLABLE)            | Tanggal pengajuan surat
+8  | created_by         | BIGINT UNSIGNED (FK, NULL) | FK -> users.id (ON DELETE SET NULL)
+9  | created_by_name    | VARCHAR(255) (NULLABLE)    | Nama pembuat surat
+10 | created_at         | TIMESTAMP (NULLABLE)       | Waktu data dibuat
+11 | updated_at         | TIMESTAMP (NULLABLE)       | Waktu data diperbarui
+
+
+5. TABEL: surat_validasi
+Deskripsi: Menyimpan histori validasi/persetujuan/penolakan surat oleh Kades.
+--------------------------------------------------------------------------------
+No | Kolom              | Tipe Data                  | Keterangan
+---+--------------------+----------------------------+--------------------------
+1  | id                 | BIGINT UNSIGNED (PK, AI)   | Primary Key
+2  | surat_id           | BIGINT UNSIGNED (FK)       | FK -> surat.id (ON DELETE CASCADE)
+3  | validated_by       | BIGINT UNSIGNED (FK)       | FK -> users.id
+4  | validator_name     | VARCHAR(255)               | Nama validator (Kades)
+5  | status             | ENUM('disetujui', 'ditolak')| Hasil validasi surat
+6  | qr_code_token      | VARCHAR(255) (NULLABLE)    | Token verifikasi QR Code
+7  | catatan            | TEXT (NULLABLE)            | Catatan / alasan validasi/penolakan
+8  | validated_at       | TIMESTAMP                  | Waktu validasi dilakukan
+9  | created_at         | TIMESTAMP (NULLABLE)       | Waktu data dibuat
+10 | updated_at         | TIMESTAMP (NULLABLE)       | Waktu data diperbarui
+
+
+6. TABEL: activity_logs
+Deskripsi: Menyimpan riwayat aktivitas audit trail aksi pengguna dalam sistem.
+--------------------------------------------------------------------------------
+No | Kolom              | Tipe Data                  | Keterangan
+---+--------------------+----------------------------+--------------------------
+1  | id                 | BIGINT UNSIGNED (PK, AI)   | Primary Key
+2  | user_name          | VARCHAR(255)               | Nama pengguna pelaksana aksi
+3  | user_role          | VARCHAR(255)               | Peran pengguna (staff/kades)
+4  | aksi               | VARCHAR(255)               | Jenis aksi (CREATE, UPDATE, dll)
+5  | deskripsi          | TEXT                       | Detail deskripsi aktivitas
+6  | model_type         | VARCHAR(255) (NULLABLE)    | Model terkait (Surat, Warga, dll)
+7  | model_id           | BIGINT UNSIGNED (NULLABLE) | ID data model terkait
+8  | created_at         | TIMESTAMP (NULLABLE)       | Waktu aktivitas tercatat
+9  | updated_at         | TIMESTAMP (NULLABLE)       | Waktu data diperbarui
+
+
+================================================================================
+RELASI ANTAR TABEL (ENTITY RELATIONSHIP):
+================================================================================
+1. [warga] 1 --------< N [surat]
+   - Relasi: Satu warga dapat mengajukan banyak surat.
+   - Foreign Key: surat.warga_id -> warga.id (ON DELETE CASCADE)
+
+2. [jenis_surat] 1 ---< N [surat]
+   - Relasi: Satu jenis surat dapat digunakan oleh banyak surat.
+   - Foreign Key: surat.jenis_surat_id -> jenis_surat.id
+
+3. [users] 1 --------< N [surat]
+   - Relasi: Pengguna (staff) mencatat/membuat surat.
+   - Foreign Key: surat.created_by -> users.id (ON DELETE SET NULL)
+
+4. [surat] 1 --------< N [surat_validasi]
+   - Relasi: Satu surat memiliki riwayat validasi.
+   - Foreign Key: surat_validasi.surat_id -> surat.id (ON DELETE CASCADE)
+
+5. [users] 1 --------< N [surat_validasi]
+   - Relasi: Pengguna (kades) melakukan validasi surat.
+   - Foreign Key: surat_validasi.validated_by -> users.id
+
+
+================================================================================
+TABEL SISTEM / PENDUKUNG (DEFAULT LARAVEL):
+================================================================================
+- password_reset_tokens : Penyimpanan token reset kata sandi (email, token, created_at)
+- sessions              : Manajemen sesi web (id, user_id, ip_address, user_agent, payload, last_activity)
+- cache & cache_locks   : Manajemen cache aplikasi
+- jobs, job_batches, failed_jobs : Manajemen antrean background worker (queue)
+================================================================================
+

@@ -174,8 +174,8 @@ export const LoginView: React.FC = () => {
       <div className="w-full max-w-md">
         {/* Brand Header */}
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1E3A8A] text-white shadow-sm">
-            <span className="text-xl font-extrabold tracking-tight">TS</span>
+          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2 border border-slate-200 shadow-sm">
+            <img src="/images/logo-deli-serdang.png" alt="Logo Kabupaten Deli Serdang" className="h-full w-full object-contain" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">SI-SELAMAT</h1>
           <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-500">

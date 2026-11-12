@@ -116,8 +116,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Brand Header */}
         <div className="flex h-20 items-center justify-between px-6 border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1E3A8A] text-white font-extrabold text-lg shadow-sm tracking-tight">
-              TS
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-50 p-1.5 border border-slate-200 shadow-sm shrink-0">
+              <img src="/images/logo-deli-serdang.png" alt="Logo Kabupaten Deli Serdang" className="h-full w-full object-contain" />
             </div>
             <div>
               <span className="text-base font-bold tracking-tight text-slate-900 block leading-tight">

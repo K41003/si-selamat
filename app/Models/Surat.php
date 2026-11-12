@@ -47,11 +47,14 @@ class Surat extends Model
         return $this->hasOne(SuratValidasi::class, 'surat_id');
     }
 
-    public static function generateNomorSurat(string $kode): string
+    public static function generateNomorSurat(string $kode = ''): string
     {
-        $year = date('Y');
-        $count = self::whereYear('created_at', $year)->count() + 1;
-        $padded = str_pad((string)$count, 2, '0', STR_PAD_LEFT);
-        return "470/{$padded}/{$kode}/TS/{$year}";
+        $romawi = [1=>'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+        $urut = static::whereYear('created_at', now()->year)->count() + 1;
+        do {
+            $nomor = sprintf('470/%03d/%s/TS/%d', $urut, $romawi[now()->month], now()->year);
+            $urut++;
+        } while (static::where('nomor_surat', $nomor)->exists());
+        return $nomor;
     }
 }

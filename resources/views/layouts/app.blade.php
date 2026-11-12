@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'SI SELAMAT' }} - Sistem Informasi Surat Desa Tanjung Selamat</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-deli-serdang.png') }}">
 
     {{-- Aset dibangun oleh Vite (Tailwind v4 + font self-host). Jalankan `npm run build`. --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -33,10 +34,14 @@
         <header class="sticky top-0 z-40 border-b border-line bg-surface no-print">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between gap-4">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-control">
-                        <span class="flex size-9 items-center justify-center rounded-control bg-brand-700 text-white">
-                            <x-icon name="building" class="size-5"/>
-                        </span>
+                    @php
+                        $logoFile = public_path('images/logo-deli-serdang.png');
+                        $logoSrc = file_exists($logoFile)
+                            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoFile))
+                            : asset('images/logo-deli-serdang.png');
+                    @endphp
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-control group">
+                        <img src="{{ $logoSrc }}" alt="Logo Kabupaten Deli Serdang" class="size-9 object-contain shrink-0 group-hover:scale-105 transition-transform">
                         <span class="leading-tight">
                             <span class="block text-base font-bold tracking-tight text-ink-900">SI SELAMAT</span>
                             <span class="block text-xs text-ink-600">Desa Tanjung Selamat &bull; Kec. Sunggal</span>

@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk - SI SELAMAT Desa Tanjung Selamat</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-deli-serdang.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-slate-800">
     <div class="max-w-md w-full">
         <!-- Logo & Title -->
+        @php
+            $logoFile = public_path('images/logo-deli-serdang.png');
+            $logoSrc = file_exists($logoFile)
+                ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoFile))
+                : asset('images/logo-deli-serdang.png');
+        @endphp
         <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-500/20 mb-4 border border-blue-400/30">
-                <svg class="w-9 h-9 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 p-2.5 shadow-xl shadow-blue-500/10 mb-4 border border-white/20 backdrop-blur-sm">
+                <img src="{{ $logoSrc }}" alt="Logo Kabupaten Deli Serdang" class="w-full h-full object-contain drop-shadow">
             </div>
             <h1 class="text-2xl font-bold text-white tracking-tight">SI SELAMAT</h1>
             <p class="text-sm text-blue-200 mt-1">Sistem Informasi Surat Elektronik & Administrasi</p>
@@ -40,11 +45,25 @@
                         placeholder="Contoh: staff atau kades">
                 </div>
 
-                <div>
+                <div x-data="{ showPassword: false }">
                     <label for="password" class="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi</label>
-                    <input type="password" id="password" name="password" required
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition"
-                        placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+                    <div class="relative">
+                        <input :type="showPassword ? 'text' : 'password'" type="password" id="password" name="password" required
+                            class="w-full px-3.5 py-2.5 pr-11 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition"
+                            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+                        <button type="button"
+                            @click="showPassword = !showPassword"
+                            class="absolute inset-y-0 right-0 flex items-center justify-center w-11 text-slate-400 hover:text-slate-600 focus:text-blue-600 focus:outline-none transition-colors"
+                            :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+                            :title="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'">
+                            <span x-show="!showPassword" class="flex items-center justify-center">
+                                <x-icon name="eye" class="w-5 h-5" />
+                            </span>
+                            <span x-show="showPassword" x-cloak class="flex items-center justify-center">
+                                <x-icon name="eye-slash" class="w-5 h-5" />
+                            </span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-between text-xs pt-1">

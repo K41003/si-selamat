@@ -1,0 +1,12 @@
+// Ganti method generateNomorSurat di app/Models/Surat.php.
+// Hasil: 470/001/VIII/TS/2026  (sesuai format PDF: 470/{urut}/{bulan romawi}/TS/{tahun})
+public static function generateNomorSurat(string $kode = ''): string
+{
+    $romawi = [1=>'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+    $urut = static::whereYear('created_at', now()->year)->count() + 1;
+    do {
+        $nomor = sprintf('470/%03d/%s/TS/%d', $urut, $romawi[now()->month], now()->year);
+        $urut++;
+    } while (static::where('nomor_surat', $nomor)->exists());
+    return $nomor;
+}
