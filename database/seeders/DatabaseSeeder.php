@@ -109,6 +109,8 @@ class DatabaseSeeder extends Seeder
             Warga::updateOrCreate(['nik' => $w['nik']], $w);
         }
 
+        $jid = fn ($kode) => \App\Models\JenisSurat::where('kode', $kode)->value('id');
+
         // 4. Seed Initial Surat
         $bambang = Warga::where('nik', '1207261508920001')->first();
         $rina = Warga::where('nik', '1207266509010004')->first();
@@ -116,12 +118,13 @@ class DatabaseSeeder extends Seeder
 
         if ($bambang) {
             $surat1 = Surat::updateOrCreate(
-                ['nomor_surat' => '470/01/SKD/TS/2026'],
+                ['nomor_surat' => '470/001/I/TS/2026'],
                 [
                     'warga_id' => $bambang->id,
-                    'jenis_surat_id' => 1,
+                    'jenis_surat_id' => $jid('SKD'),
+                    
                     'status' => 'disetujui',
-                    'data_isian' => ['keperluan' => 'Pengurusan kelengkapan berkas administrasi kredit perbankan'],
+                    'data_isian' => ['bertempat' => 'sejak tahun 2015', 'dusun' => 'II'],
                     'tanggal_pengajuan' => '2026-10-25',
                     'created_by' => $staff->id,
                     'created_by_name' => 'Amanda Rahmawati (Staff Pelayanan)',
@@ -134,7 +137,7 @@ class DatabaseSeeder extends Seeder
                     'validated_by' => $kades->id,
                     'validator_name' => $kades->name,
                     'status' => 'disetujui',
-                    'qr_code_token' => 'QR-TS-470-01-SKD-TS-2026-20261026',
+                    'qr_code_token' => 'QR-TS-SEED0000000000000001',
                     'catatan' => 'Berkas dan identitas kependudukan terverifikasi lengkap.',
                     'validated_at' => '2026-10-26 10:15:00',
                 ]
@@ -143,16 +146,12 @@ class DatabaseSeeder extends Seeder
 
         if ($rina) {
             Surat::updateOrCreate(
-                ['nomor_surat' => '470/02/SKTM/TS/2026'],
+                ['nomor_surat' => '470/002/I/TS/2026'],
                 [
                     'warga_id' => $rina->id,
-                    'jenis_surat_id' => 2,
+                    'jenis_surat_id' => $jid('SKTM'),
                     'status' => 'diajukan',
-                    'data_isian' => [
-                        'keperluan' => 'Permohonan Keringanan Uang Kuliah Tunggal (UKT) Semester Genap',
-                        'penghasilan_per_bulan' => '1200000',
-                        'jumlah_tanggungan' => '3',
-                    ],
+                    'data_isian' => ['keperluan' => 'Permohonan Keringanan Uang Kuliah Tunggal (UKT) Semester Genap'],
                     'tanggal_pengajuan' => '2026-10-28',
                     'created_by' => $staff->id,
                     'created_by_name' => 'Amanda Rahmawati (Staff Pelayanan)',
@@ -162,17 +161,12 @@ class DatabaseSeeder extends Seeder
 
         if ($dedi) {
             Surat::updateOrCreate(
-                ['nomor_surat' => '470/03/SKU/TS/2026'],
+                ['nomor_surat' => '470/003/I/TS/2026'],
                 [
                     'warga_id' => $dedi->id,
-                    'jenis_surat_id' => 3,
+                    'jenis_surat_id' => $jid('MDJ'),
                     'status' => 'draft',
-                    'data_isian' => [
-                        'nama_usaha' => 'Toko Kelontong Berkah Suryadi',
-                        'jenis_usaha' => 'Perdagangan Sembako & Kebutuhan Harian',
-                        'alamat_usaha' => 'Jl. Melati Dusun III No. 8 Tanjung Selamat',
-                        'tahun_berdiri' => '2019',
-                    ],
+                    'data_isian' => ['tujuan' => 'Medan', 'desa' => 'Kota Matsum', 'kecamatan' => 'Medan Area', 'kabupaten' => 'Kota Medan', 'provinsi' => 'Sumatera Utara', 'keperluan' => 'Bekerja', 'lamanya' => '6 bulan'],
                     'tanggal_pengajuan' => '2026-10-29',
                     'created_by' => $staff->id,
                     'created_by_name' => 'Amanda Rahmawati (Staff Pelayanan)',
@@ -194,7 +188,7 @@ class DatabaseSeeder extends Seeder
             'user_name' => 'H. AHMAD FAUZI, S.Sos',
             'user_role' => 'Kepala Desa',
             'aksi' => 'Validasi Surat Disetujui',
-            'deskripsi' => 'Menyetujui & menerbitkan e-signature surat Surat Keterangan Domisili No. 470/01/SKD/TS/2026',
+            'deskripsi' => 'Menyetujui & menerbitkan e-signature surat Surat Keterangan Domisili No. 470/001/I/TS/2026',
             'model_type' => 'Surat',
             'model_id' => 1,
         ]);

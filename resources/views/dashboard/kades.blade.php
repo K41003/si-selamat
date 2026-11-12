@@ -87,12 +87,12 @@
                             <span class="text-ink-800">
                                 @php
                                     $keteranganPairs = [];
-                                    foreach($s->data_isian as $k => $v) {
-                                        $label = str_replace('_', ' ', $k);
-                                        $formattedVal = (is_numeric($v) && (str_contains(strtolower($k), 'penghasilan') || str_contains(strtolower($k), 'gaji') || str_contains(strtolower($k), 'biaya')))
-                                            ? 'Rp ' . number_format((float)$v, 0, ',', '.')
-                                            : (is_scalar($v) ? $v : json_encode($v));
-                                        $keteranganPairs[] = "<strong class='font-medium text-ink-600 capitalize'>{$label}:</strong> {$formattedVal}";
+                                    foreach($s->isianUntukTampil() as $r) {
+                                        $nilai = isset($r['list']) ? implode('; ', $r['list']) : $r['text'];
+                                        if (is_numeric($nilai) && preg_match('/penghasilan|gaji|biaya/i', $r['label'])) {
+                                            $nilai = 'Rp ' . number_format((float) $nilai, 0, ',', '.');
+                                        }
+                                        $keteranganPairs[] = "<strong class='font-medium text-ink-600'>" . e($r['label']) . ":</strong> " . e($nilai);
                                     }
                                 @endphp
                                 {!! implode(' &bull; ', $keteranganPairs) !!}

@@ -125,8 +125,8 @@ class SuratController extends Controller
             'nama' => $w->nama,
             'no_kk' => $w->no_kk,
             'tempat_lahir' => $w->tempat_lahir,
-            'tanggal_lahir' => date('d/m/Y', strtotime($w->tanggal_lahir)),
-            'ttl' => $w->tempat_lahir . ', ' . date('d/m/Y', strtotime($w->tanggal_lahir)),
+            'tanggal_lahir' => $w->tanggal_lahir ? date('d/m/Y', strtotime($w->tanggal_lahir)) : '-',
+            'ttl' => $w->tempat_lahir . ($w->tanggal_lahir ? ', ' . date('d/m/Y', strtotime($w->tanggal_lahir)) : ''),
             'jenis_kelamin' => $w->jenis_kelamin,
             'agama' => $w->agama,
             'pekerjaan' => $w->pekerjaan,
@@ -141,11 +141,13 @@ class SuratController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nomor_surat' => ['required', 'string', 'max:255', 'unique:surat,nomor_surat'],
+            'nomor_surat' => ['required', 'string', 'max:255', 'not_regex:/\/\//', 'unique:surat,nomor_surat'],
             'warga_id' => ['required', 'exists:warga,id'],
             'jenis_surat_id' => ['required', 'exists:jenis_surat,id'],
             'action' => ['required', 'in:draft,ajukan'],
             'data_isian' => ['nullable', 'array'],
+        ], [
+            'nomor_surat.not_regex' => 'Nomor surat belum lengkap: isi nomor urut (contoh 470/012/XI/TS/2026).',
         ]);
 
         $user = Auth::user();
@@ -213,11 +215,13 @@ class SuratController extends Controller
         }
 
         $request->validate([
-            'nomor_surat' => ['required', 'string', 'max:255', 'unique:surat,nomor_surat,' . $surat->id],
+            'nomor_surat' => ['required', 'string', 'max:255', 'not_regex:/\/\//', 'unique:surat,nomor_surat,' . $surat->id],
             'warga_id' => ['required', 'exists:warga,id'],
             'jenis_surat_id' => ['required', 'exists:jenis_surat,id'],
             'action' => ['required', 'in:draft,ajukan'],
             'data_isian' => ['nullable', 'array'],
+        ], [
+            'nomor_surat.not_regex' => 'Nomor surat belum lengkap: isi nomor urut (contoh 470/012/XI/TS/2026).',
         ]);
 
         $user = Auth::user();
@@ -246,6 +250,10 @@ class SuratController extends Controller
 
     public function destroy(Surat $surat)
     {
+        if ($surat->status === 'disetujui') {
+            return redirect()->route('surat.show', $surat)->with('error', 'Surat yang telah disetujui tidak dapat dihapus.');
+        }
+
         $nomor = $surat->nomor_surat;
         $id = $surat->id;
         $surat->delete();
@@ -280,6 +288,10 @@ class SuratController extends Controller
 
     public function print(Surat $surat)
     {
+        if ($surat->status !== 'disetujui') {
+            return redirect()->route('surat.show', $surat)->with('error', 'Surat hanya dapat dicetak setelah disetujui Kepala Desa.');
+        }
+
         $surat->load(['warga', 'jenisSurat', 'validasi.validator']);
         return view('surat.print', compact('surat'));
     }

@@ -11,7 +11,7 @@
         'disetujui' => 'Disetujui dan e-signature sudah diterbitkan.',
         'ditolak'   => 'Ditolak. Surat perlu diperbaiki lalu diajukan kembali.',
     ][$surat->status] ?? '';
-    $tglLahir = \Carbon\Carbon::parse($warga->tanggal_lahir)->locale('id')->translatedFormat('d F Y');
+    $tglLahir = $warga->tanggal_lahir ? \Carbon\Carbon::parse($warga->tanggal_lahir)->locale('id')->translatedFormat('d F Y') : '-';
     $catatanTolak = $surat->status === 'ditolak' && $surat->validasi ? $surat->validasi->catatan : null;
 @endphp
 
@@ -74,7 +74,7 @@
                 <div><dt class="text-sm text-ink-600">Tempat, tanggal lahir</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->tempat_lahir }}, {{ $tglLahir }}</dd></div>
                 <div><dt class="text-sm text-ink-600">Jenis kelamin / agama</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->jenis_kelamin }} &bull; {{ $warga->agama }}</dd></div>
                 <div><dt class="text-sm text-ink-600">Pekerjaan</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->pekerjaan }}</dd></div>
-                <div><dt class="text-sm text-ink-600">Alamat</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->alamat }} <span class="font-normal text-ink-700">(RT {{ $warga->rt ?? '-' }} / RW {{ $warga->rw ?? '-' }})</span></dd></div>
+                <div><dt class="text-sm text-ink-600">Alamat</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->alamat }} @if($warga->rt || $warga->rw)<span class="font-normal text-ink-700">(RT {{ $warga->rt ?? '-' }} / RW {{ $warga->rw ?? '-' }})</span>@endif</dd></div>
             </dl>
         </x-card>
 
@@ -82,10 +82,14 @@
             <h2 class="text-title-sm font-semibold text-ink-900">Data isian surat</h2>
             @if(!empty($surat->data_isian))
             <dl class="mt-4 space-y-4">
-                @foreach($surat->data_isian as $key => $val)
+                @foreach($surat->isianUntukTampil() as $r)
                 <div>
-                    <dt class="text-sm capitalize text-ink-600">{{ str_replace('_', ' ', $key) }}</dt>
-                    <dd class="mt-0.5 break-words font-medium text-ink-900">{{ is_scalar($val) ? $val : json_encode($val) }}</dd>
+                    <dt class="text-sm text-ink-600">{{ $r['label'] }}</dt>
+                    @if(isset($r['list']))
+                    <dd class="mt-0.5 font-medium text-ink-900"><ol class="list-decimal space-y-0.5 pl-5">@foreach($r['list'] as $li)<li class="break-words">{{ $li }}</li>@endforeach</ol></dd>
+                    @else
+                    <dd class="mt-0.5 break-words font-medium text-ink-900">{{ $r['text'] }}</dd>
+                    @endif
                 </div>
                 @endforeach
             </dl>

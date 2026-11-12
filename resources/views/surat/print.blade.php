@@ -52,14 +52,14 @@
     table.bio.in { margin-left: 5mm; }
 
     table.grid { width: 100%; border-collapse: collapse; margin: 1mm 0 3mm; }
-    table.grid th, table.grid td { border: 1px solid #000; padding: 0 2mm; height: 5mm; font-size: 10.5pt; }
+    table.grid th, table.grid td { border: 1px solid #000; padding: 0 2mm; height: 5mm; font-size: 10.5pt; text-align: center; vertical-align: middle; }
     table.grid th { font-weight: bold; text-align: center; line-height: 1.1; }
 
-    .ttd { margin-left: 55%; margin-top: 6mm; }
+    .ttd { margin-left: 55%; margin-top: 6mm; text-align: center; }
     .ttd .nm { text-align: center; font-weight: bold; margin-top: 3mm; }
     .ttd .space { height: 24mm; display: flex; align-items: center; justify-content: center; }
     .ttd .space small { font: 6.5pt monospace; display: block; text-align: center; }
-    .ttd .name { text-align: center; font-weight: bold; }
+    .ttd .name { text-align: center; font-weight: bold; text-decoration: underline; }
 
     .bar { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 9; font-family: Arial, sans-serif; }
     .bar a, .bar button { background: #0f172a; color: #fff; border: 0; border-radius: 10px; padding: 8px 14px; font-size: 13px; text-decoration: none; cursor: pointer; }

@@ -9,10 +9,10 @@ class ActivityLogController extends Controller
 {
     // Kelompok aksi → kategori filter
     private const KATEGORI = [
-        'surat'  => ['Buat Surat', 'Ajukan Surat', 'Validasi Surat', 'Tolak Surat', 'Hapus Surat', 'Cetak Surat'],
-        'warga'  => ['Tambah Warga', 'Ubah Warga', 'Hapus Warga'],
-        'nik'    => ['Buka NIK Warga'],
-        'akses'  => ['Login Sistem', 'Logout Sistem'],
+        'surat' => ['Simpan Draft Surat', 'Buat Permohonan Surat', 'Perbarui Draft Surat', 'Pengajuan Surat ke Kades', 'Hapus Surat', 'Validasi Surat Disetujui', 'Validasi Surat Ditolak'],
+        'warga' => ['Tambah Data Warga', 'Update Data Warga', 'Hapus Data Warga', 'Import Data Warga CSV'],
+        'nik'   => ['Buka NIK Warga'],
+        'akses' => ['Login Sistem', 'Logout Sistem'],
     ];
 
     public function index(Request $request)

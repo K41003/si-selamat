@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Warga;
 use App\Models\ActivityLog;
+use App\Http\Requests\WargaRequest;
 use Illuminate\Http\Request;
 
 class WargaController extends Controller
@@ -11,14 +12,15 @@ class WargaController extends Controller
     public function index(Request $request)
     {
         $q = $request->input('q');
+        $like = $q ? str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $q) : null;
 
         $query = Warga::query();
 
         if ($q) {
             $query->where(function ($sub) use ($q) {
-                $sub->where('nama', 'like', "%{$q}%")
-                    ->orWhere('nik', 'like', "%{$q}%")
-                    ->orWhere('no_kk', 'like', "%{$q}%");
+                $sub->where('nama', 'like', "%{$like}%")
+                    ->orWhere('nik', 'like', "%{$like}%")
+                    ->orWhere('no_kk', 'like', "%{$like}%");
             });
         }
 
@@ -33,23 +35,9 @@ class WargaController extends Controller
         return view('warga.create');
     }
 
-    public function store(Request $request)
+    public function store(WargaRequest $request)
     {
-        $validated = $request->validate([
-            'nik' => ['required', 'string', 'size:16', 'unique:warga,nik'],
-            'no_kk' => ['required', 'string', 'size:16'],
-            'nama' => ['required', 'string', 'max:255'],
-            'tempat_lahir' => ['required', 'string', 'max:100'],
-            'tanggal_lahir' => ['required', 'date'],
-            'jenis_kelamin' => ['required', 'in:Laki-laki,Perempuan'],
-            'agama' => ['required', 'string', 'max:50'],
-            'pekerjaan' => ['required', 'string', 'max:100'],
-            'status_perkawinan' => ['required', 'in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati'],
-            'alamat' => ['required', 'string'],
-            'rt' => ['nullable', 'string', 'max:10'],
-            'rw' => ['nullable', 'string', 'max:10'],
-            'no_hp' => ['nullable', 'string', 'max:20'],
-        ]);
+        $validated = $request->validated();
 
         $warga = Warga::create($validated);
 
@@ -77,23 +65,9 @@ class WargaController extends Controller
         return view('warga.edit', compact('warga'));
     }
 
-    public function update(Request $request, Warga $warga)
+    public function update(WargaRequest $request, Warga $warga)
     {
-        $validated = $request->validate([
-            'nik' => ['required', 'string', 'size:16', 'unique:warga,nik,' . $warga->id],
-            'no_kk' => ['required', 'string', 'size:16'],
-            'nama' => ['required', 'string', 'max:255'],
-            'tempat_lahir' => ['required', 'string', 'max:100'],
-            'tanggal_lahir' => ['required', 'date'],
-            'jenis_kelamin' => ['required', 'in:Laki-laki,Perempuan'],
-            'agama' => ['required', 'string', 'max:50'],
-            'pekerjaan' => ['required', 'string', 'max:100'],
-            'status_perkawinan' => ['required', 'in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati'],
-            'alamat' => ['required', 'string'],
-            'rt' => ['nullable', 'string', 'max:10'],
-            'rw' => ['nullable', 'string', 'max:10'],
-            'no_hp' => ['nullable', 'string', 'max:20'],
-        ]);
+        $validated = $request->validated();
 
         $warga->update($validated);
 
@@ -128,15 +102,19 @@ class WargaController extends Controller
         return redirect()->route('warga.index')->with('success', "Data warga {$nama} berhasil dihapus.");
     }
 
-    public function apiSearch(Request $request)
-    {
-        $q = $request->input('q', '');
-        $warga = Warga::where('nama', 'like', "%{$q}%")
-            ->orWhere('nik', 'like', "%{$q}%")
-            ->orWhere('no_kk', 'like', "%{$q}%")
-            ->limit(10)
-            ->get();
 
-        return response()->json($warga);
+    /**
+     * Tampilkan NIK lengkap (dicatat di log aktivitas). Dipanggil via POST dari komponen nik-reveal.
+     */
+    public function tampilkanNik(Warga $warga)
+    {
+        ActivityLog::log(
+            'Buka NIK Warga',
+            "Membuka NIK lengkap warga: {$warga->nama}",
+            'Warga',
+            $warga->id
+        );
+
+        return response()->json(['nik' => $warga->nik]);
     }
 }

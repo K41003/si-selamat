@@ -10,7 +10,7 @@
         'id' => $w->id,
         'nama' => $w->nama,
         'nik_masked' => $w->masked_nik,
-        'ttl' => $w->tempat_lahir . ', ' . date('d/m/Y', strtotime($w->tanggal_lahir)),
+        'ttl' => $w->tempat_lahir . ($w->tanggal_lahir ? ', ' . date('d/m/Y', strtotime($w->tanggal_lahir)) : ''),
         'pekerjaan' => $w->pekerjaan,
         'alamat' => $w->alamat,
     ] : null;

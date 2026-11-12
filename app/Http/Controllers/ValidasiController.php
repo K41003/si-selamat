@@ -7,6 +7,7 @@ use App\Models\SuratValidasi;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ValidasiController extends Controller
 {
@@ -27,9 +28,11 @@ class ValidasiController extends Controller
             abort(403, 'Hanya Kepala Desa yang berwenang menyetujui surat.');
         }
 
-        $cleanNomor = str_replace('/', '-', $surat->nomor_surat);
-        $dateFormatted = date('Ymd');
-        $qrToken = "QR-TS-{$cleanNomor}-{$dateFormatted}";
+        if ($surat->status !== 'diajukan') {
+            return back()->with('error', 'Hanya surat berstatus diajukan yang dapat divalidasi.');
+        }
+
+        $qrToken = 'QR-TS-' . strtoupper(Str::random(24)); // acak, tidak bisa ditebak/dipalsukan
 
         $surat->update(['status' => 'disetujui']);
 
@@ -60,6 +63,10 @@ class ValidasiController extends Controller
         $user = Auth::user();
         if (!$user->isKades()) {
             abort(403, 'Hanya Kepala Desa yang berwenang menolak surat.');
+        }
+
+        if ($surat->status !== 'diajukan') {
+            return back()->with('error', 'Hanya surat berstatus diajukan yang dapat divalidasi.');
         }
 
         $request->validate([

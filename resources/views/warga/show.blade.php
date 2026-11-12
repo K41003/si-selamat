@@ -7,7 +7,7 @@
         'No. KK'                  => ['v' => $warga->no_kk, 'mono' => true],
         'Jenis kelamin'           => ['v' => $warga->jenis_kelamin],
         'Agama'                   => ['v' => $warga->agama],
-        'Tempat & tanggal lahir'  => ['v' => $warga->tempat_lahir . ', ' . \Carbon\Carbon::parse($warga->tanggal_lahir)->locale('id')->translatedFormat('d F Y')],
+        'Tempat & tanggal lahir'  => ['v' => $warga->tempat_lahir . ', ' . ($warga->tanggal_lahir ? \Carbon\Carbon::parse($warga->tanggal_lahir)->locale('id')->translatedFormat('d F Y') : '-')],
         'Status perkawinan'       => ['v' => $warga->status_perkawinan],
         'Pekerjaan'               => ['v' => $warga->pekerjaan],
         'No. telepon / HP'        => ['v' => $warga->no_hp ?: '-'],

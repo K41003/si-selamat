@@ -3,7 +3,7 @@
 
    Kontrak dengan backend (SuratController@store) TIDAK berubah:
    warga_id, jenis_surat_id, action (draft|ajukan), data_isian[...].
-   Pencarian memakai endpoint yang sudah ada: route('warga.api.search')?q=
+   Pencarian memakai endpoint yang sudah ada: route('warga.cari')?q=
    --------------------------------------------------------------------------- */
 import Alpine from "alpinejs";
 

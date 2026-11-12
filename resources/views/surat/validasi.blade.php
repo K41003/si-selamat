@@ -34,10 +34,10 @@
                     <div class="rounded-control border border-line bg-canvas p-3">
                         <p class="text-sm font-medium text-ink-900">Keterangan khusus</p>
                         <dl class="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-                            @foreach($s->data_isian as $k => $v)
+                            @foreach($s->isianUntukTampil() as $r)
                             <div>
-                                <dt class="capitalize text-ink-600">{{ str_replace('_', ' ', $k) }}</dt>
-                                <dd class="break-words text-ink-900">{{ is_scalar($v) ? $v : json_encode($v) }}</dd>
+                                <dt class="text-ink-600">{{ $r['label'] }}</dt>
+                                <dd class="break-words text-ink-900">{{ isset($r['list']) ? implode('; ', $r['list']) : $r['text'] }}</dd>
                             </div>
                             @endforeach
                         </dl>

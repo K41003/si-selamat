@@ -1,4 +1,4 @@
-<p>Kepala Desa Tanjung Selamat Kecamatan Sunggal Kabupaten Deli Serdang dengan ini menerangkan bahwa :</p>
+<p>Kepala Desa Tanjung Selamat Kecamatan Sunggal Kabupaten Deli Serdang dengan ini menerangkan&nbsp;bahwa&nbsp;:</p>
 @include('surat.templates._bio', ['rows' => [
     'Nama Lengkap' => $w->nama,
     'Tempat/Tanggal Lahir' => $ttl,
@@ -12,3 +12,4 @@
 <p>Nama tersebut di atas benar Penduduk Desa Tanjung Selamat Kecamatan Sunggal Kabupaten Deli Serdang, dan menurut sepengetahuan kami memang benar nama tersebut di atas berasal dari <b>Keluarga Kurang Mampu/Miskin</b>.</p>
 <p>Surat Keterangan ini dibuat atas permintaan yang bersangkutan guna untuk melengkapi persyaratan administrasi {!! $v('keperluan', '.................') !!}</p>
 <p>Demikianlah Surat Keterangan ini diperbuat dengan sebenarnya untuk dapat dipergunakan seperlunya.</p>
+@include('surat.templates._ttd')

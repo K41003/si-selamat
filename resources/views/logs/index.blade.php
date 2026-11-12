@@ -13,15 +13,15 @@
     // Hitung per kategori untuk label tab
     $counts = [
         ''      => \App\Models\ActivityLog::count(),
-        'surat' => \App\Models\ActivityLog::whereIn('aksi', ['Buat Surat','Ajukan Surat','Validasi Surat','Tolak Surat','Hapus Surat','Cetak Surat'])->count(),
-        'warga' => \App\Models\ActivityLog::whereIn('aksi', ['Tambah Warga','Ubah Warga','Hapus Warga'])->count(),
+        'surat' => \App\Models\ActivityLog::whereIn('aksi', ['Simpan Draft Surat','Buat Permohonan Surat','Perbarui Draft Surat','Pengajuan Surat ke Kades','Hapus Surat','Validasi Surat Disetujui','Validasi Surat Ditolak'])->count(),
+        'warga' => \App\Models\ActivityLog::whereIn('aksi', ['Tambah Data Warga','Update Data Warga','Hapus Data Warga','Import Data Warga CSV'])->count(),
         'nik'   => \App\Models\ActivityLog::whereIn('aksi', ['Buka NIK Warga'])->count(),
         'akses' => \App\Models\ActivityLog::whereIn('aksi', ['Login Sistem','Logout Sistem'])->count(),
     ];
 @endphp
 
 <div class="space-y-6">
-    <x-page-header title="Log Aktivitas &amp; Audit Trail"
+    <x-page-header title="Log Aktivitas & Audit Trail"
                    subtitle="Rekam jejak seluruh tindakan staf dan kepala desa pada sistem." />
 
     <x-card :padded="false" class="overflow-hidden">

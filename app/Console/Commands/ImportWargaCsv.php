@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\ActivityLog;
-use App\Models\User;
 use DateTime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -49,8 +48,6 @@ class ImportWargaCsv extends Command
 
         $this->info("Membaca dan memproses CSV: " . basename($csvPath));
 
-        $staffUser = User::where('role', 'staff')->first();
-        $staffId = $staffUser?->id ?? 1;
 
         $handle = fopen($csvPath, 'r');
         if (!$handle) {
@@ -156,8 +153,6 @@ class ImportWargaCsv extends Command
                     'rt' => $rt,
                     'rw' => $rw,
                     'no_hp' => null,
-                    'created_by' => $staffId,
-                    'updated_by' => $staffId,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -178,13 +173,12 @@ class ImportWargaCsv extends Command
 
             // Simpan log aktivitas
             ActivityLog::create([
-                'user_id' => $staffId,
-                'aktivitas' => 'Import Data Warga CSV',
-                'deskripsi' => "Berhasil mengimpor {$totalImported} data kependudukan dari file CSV {$csvPath}.",
-                'subject_type' => null,
-                'subject_id' => null,
-                'ip_address' => '127.0.0.1',
-                'created_at' => $now,
+                'user_name' => 'Sistem',
+                'user_role' => 'Sistem',
+                'aksi' => 'Import Data Warga CSV',
+                'deskripsi' => "Berhasil mengimpor {$totalImported} data kependudukan dari file CSV " . basename($csvPath) . ".",
+                'model_type' => null,
+                'model_id' => null,
             ]);
 
             DB::commit();
