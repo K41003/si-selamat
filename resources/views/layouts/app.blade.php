@@ -46,7 +46,7 @@
                     @auth
                     <div class="ml-auto flex items-center gap-4 py-2 xl:order-last">
                         <div class="hidden text-right leading-tight md:block">
-                            <p class="max-w-[13rem] text-sm font-semibold leading-snug text-ink-900 2xl:max-w-none 2xl:whitespace-nowrap" title="{{ auth()->user()->active_staff_name ?: auth()->user()->name }}">{{ auth()->user()->active_staff_name ?: auth()->user()->name }}</p>
+                            <p class="text-xs font-semibold text-ink-900 whitespace-nowrap" title="{{ auth()->user()->active_staff_name ?: auth()->user()->name }}">{{ auth()->user()->active_staff_name ?: auth()->user()->name }}</p>
                             <p class="text-xs text-ink-600">{{ auth()->user()->role === 'kades' ? 'Kepala Desa' : 'Staf Pelayanan' }}</p>
                         </div>
                         <form method="POST" action="{{ route('logout') }}">
