@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', $surat->jenisSurat->nama_jenis . ' – ' . $surat->nomor_surat)
+
 @section('content')
 @php
     $warga = $surat->warga;
@@ -69,7 +71,16 @@
             <h2 class="text-title-sm font-semibold text-ink-900">Warga pemohon</h2>
             <dl class="mt-4 space-y-4">
                 <div><dt class="text-sm text-ink-600">Nama lengkap</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->nama }}</dd></div>
-                <div><dt class="text-sm text-ink-600">NIK</dt><dd class="mt-1"><x-nik-reveal :warga="$warga" /></dd></div>
+                <div>
+                    <dt class="text-sm text-ink-600">NIK</dt>
+                    <dd class="mt-1">
+                        @if(auth()->check() && (auth()->user()->isKades() || auth()->user()->role === 'staff'))
+                            <x-nik-reveal :warga="$warga" />
+                        @else
+                            <span class="font-mono text-ink-900">{{ $warga->masked_nik }}</span>
+                        @endif
+                    </dd>
+                </div>
                 <div><dt class="text-sm text-ink-600">No. KK</dt><dd class="mt-0.5 font-mono text-ink-900">{{ $warga->no_kk }}</dd></div>
                 <div><dt class="text-sm text-ink-600">Tempat, tanggal lahir</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->tempat_lahir }}, {{ $tglLahir }}</dd></div>
                 <div><dt class="text-sm text-ink-600">Jenis kelamin / agama</dt><dd class="mt-0.5 font-medium text-ink-900">{{ $warga->jenis_kelamin }} &bull; {{ $warga->agama }}</dd></div>
@@ -138,7 +149,7 @@
 <x-confirm-dialog id="tolak-{{ $surat->id }}" :action="route('validasi.reject', $surat)"
     title="Tolak permohonan surat?" confirm-label="Tolak permohonan" variant="danger">
     <p class="mb-4">Berikan catatan perbaikan agar staf dapat memperbaiki surat <span class="font-mono">{{ $surat->nomor_surat }}</span>.</p>
-    <x-field label="Alasan penolakan" name="catatan" as="textarea" rows="3" required id="catatan-{{ $surat->id }}" placeholder="Contoh: Alamat usaha belum lengkap." />
+    <x-field label="Alasan penolakan" name="catatan" as="textarea" rows="3" required id="catatan-tolak-{{ $surat->id }}" placeholder="Contoh: Alamat usaha belum lengkap." />
 </x-confirm-dialog>
 @endif
 @endsection

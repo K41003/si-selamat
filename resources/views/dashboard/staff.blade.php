@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Dashboard')
+
 @section('content')
 @php
     $namaUser = auth()->user()->active_staff_name ?: auth()->user()->name;
@@ -25,9 +27,10 @@
     {{-- Strip statistik: satu kartu, pemisah tipis, tanpa ikon warna-warni --}}
     <section aria-label="Ringkasan">
         <x-card :padded="false" class="overflow-hidden">
-            <div class="grid grid-cols-2 gap-px bg-line lg:grid-cols-4">
+            <div class="grid grid-cols-2 gap-px bg-line sm:grid-cols-3 lg:grid-cols-5">
                 <x-stat label="Total penduduk" :value="number_format($stats['total_warga'])" hint="Warga terdaftar" />
-                <x-stat label="Draf surat" :value="$stats['total_draft']" hint="Belum diajukan ke Kades" emphasis />
+                <x-stat label="Surat bulan ini" :value="$stats['surat_bulan_ini']" hint="{{ now()->translatedFormat('F Y') }}" emphasis />
+                <x-stat label="Draf surat" :value="$stats['total_draft']" hint="Belum diajukan ke Kades" />
                 <x-stat label="Menunggu validasi" :value="$stats['total_diajukan']" hint="Sedang ditinjau Kades" />
                 <x-stat label="Surat disetujui" :value="$stats['total_disetujui']" hint="Siap dicetak" />
             </div>
@@ -46,7 +49,7 @@
 
             @if($recentSurat->isEmpty())
                 <div class="border-t border-line">
-                    <x-empty-state title="Belum ada permohonan surat" description="Permohonan yang dibuat akan muncul di sini.">
+                    <x-empty-state icon="document-text" title="Belum ada permohonan surat" description="Permohonan yang dibuat akan muncul di sini.">
                         <x-button href="{{ route('surat.create') }}"><x-icon name="plus" class="size-4"/> Buat surat</x-button>
                     </x-empty-state>
                 </div>

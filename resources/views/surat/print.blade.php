@@ -75,6 +75,9 @@
 <div class="bar no-print">
     <a href="{{ route('surat.show', $surat) }}">&larr; Kembali</a>
     <button onclick="window.print()">Cetak / Simpan PDF</button>
+    <noscript>
+        <p style="color:#cbd5e1;font-family:Arial,sans-serif;font-size:12px;margin:0 10px;">JavaScript nonaktif. Gunakan menu File &rarr; Print di browser Anda.</p>
+    </noscript>
 </div>
 
 <div class="page {{ in_array($kode, ['MMS','MDJ']) ? 'compact' : '' }}">

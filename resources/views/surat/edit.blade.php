@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Perbarui Surat – ' . $surat->nomor_surat)
+
 @section('content')
 <div class="mx-auto max-w-4xl space-y-6">
     <x-page-header title="Perbarui Surat" :subtitle="'No. Surat: ' . $surat->nomor_surat" :back="route('surat.show', $surat)" />

@@ -1,5 +1,6 @@
 @extends('layouts.app')
 
+@section('title', 'Dashboard Kepala Desa')
 @section('content')
 @php
     $iconBtn = 'inline-flex size-9 items-center justify-center rounded-control text-ink-600 hover:bg-canvas hover:text-ink-900';
@@ -19,8 +20,9 @@
     {{-- Strip Statistik (1 Kartu Datar, 4 Kolom) --}}
     <section aria-label="Ringkasan validasi surat">
         <x-card :padded="false" class="overflow-hidden">
-            <div class="grid grid-cols-2 gap-px bg-line lg:grid-cols-4">
+            <div class="grid grid-cols-2 gap-px bg-line sm:grid-cols-3 lg:grid-cols-5">
                 <x-stat label="Perlu validasi" :value="$stats['perlu_validasi']" hint="Menunggu persetujuan Anda" :emphasis="$stats['perlu_validasi'] > 0" />
+                <x-stat label="Surat bulan ini" :value="$stats['surat_bulan_ini']" hint="{{ now()->translatedFormat('F Y') }}" />
                 <x-stat label="Surat disetujui" :value="$stats['disetujui']" hint="Telah terbit & bertanda tangan" />
                 <x-stat label="Surat ditolak" :value="$stats['ditolak']" hint="Memerlukan revisi staf" />
                 <x-stat label="Total penduduk" :value="number_format($stats['total_warga'])" hint="Warga terdaftar" />
@@ -198,7 +200,7 @@
 <x-confirm-dialog id="tolak-{{ $s->id }}" :action="route('validasi.reject', $s)"
     title="Tolak permohonan surat?" confirm-label="Tolak permohonan" variant="danger">
     <p class="mb-4">Berikan catatan perbaikan agar staf dapat memperbaiki atau melengkapi surat <span class="font-mono">{{ $s->nomor_surat }}</span>.</p>
-    <x-field label="Alasan penolakan" name="catatan" as="textarea" rows="3" required id="catatan-{{ $s->id }}" placeholder="Contoh: Keterangan alamat usaha kurang spesifik, mohon verifikasi kembali." />
+    <x-field label="Alasan penolakan" name="catatan" as="textarea" rows="3" required id="catatan-tolak-{{ $s->id }}" placeholder="Contoh: Keterangan alamat usaha kurang spesifik, mohon verifikasi kembali." />
 </x-confirm-dialog>
 @endforeach
 @endsection

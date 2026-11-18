@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Tambah Data Warga')
+
 @section('content')
 <div class="mx-auto max-w-3xl space-y-6">
     <x-page-header title="Tambah Data Warga" subtitle="Formulir identitas kependudukan warga Desa Tanjung Selamat." :back="route('warga.index')" />

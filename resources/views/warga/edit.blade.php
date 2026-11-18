@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Edit Data Warga – ' . $warga->nama)
+
 @section('content')
 <div class="mx-auto max-w-3xl space-y-6">
     <x-page-header title="Edit Data Warga" :subtitle="'Perbarui data identitas kependudukan ' . $warga->nama . '.'" :back="route('warga.index')" />

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Data Warga – ' . $warga->nama)
+
 @section('content')
 @php
     $iconBtn = 'inline-flex size-9 items-center justify-center rounded-control text-ink-600 hover:bg-canvas hover:text-ink-900';

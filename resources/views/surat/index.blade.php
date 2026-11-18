@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Daftar Surat')
+
 @section('content')
 @php
     // [kunci status, label tab]
@@ -10,7 +12,7 @@
         'disetujui' => 'Disetujui',
         'ditolak'   => 'Ditolak',
     ];
-    $iconBtn = 'inline-flex size-9 items-center justify-center rounded-control text-ink-600 hover:bg-canvas hover:text-ink-900';
+    $iconBtn = 'inline-flex size-9 items-center justify-center rounded-control text-ink-600 hover:bg-canvas hover:text-ink-900 transition-all duration-150 active:scale-95';
 @endphp
 
 <div class="space-y-6">
@@ -24,11 +26,11 @@
 
     <x-card :padded="false" class="overflow-hidden">
         {{-- Tab status: garis bawah, jumlah sebagai teks biasa --}}
-        <nav aria-label="Filter status surat" class="flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line px-3 sm:px-4">
+        <nav aria-label="Filter status surat" class="relative -mb-px flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line px-3 sm:px-4">
             @foreach($tabs as $key => $label)
             @php $aktif = $status === $key; @endphp
             <a href="{{ route('surat.index', ['status' => $key, 'q' => $search]) }}" @if($aktif) aria-current="page" @endif
-               class="inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm transition-colors {{ $aktif ? 'border-brand-700 font-semibold text-brand-700' : 'border-transparent font-medium text-ink-600 hover:border-line hover:text-ink-900' }}">
+               class="inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm transition-all duration-150 {{ $aktif ? 'border-brand-700 font-semibold text-brand-700' : 'border-transparent font-medium text-ink-600 hover:border-line hover:text-ink-900' }}">
                 {{ $label }}
                 <span class="font-normal tabular-nums text-ink-600">{{ $counts[$key] }}</span>
             </a>
@@ -36,7 +38,7 @@
         </nav>
 
         {{-- Pencarian --}}
-        <form method="GET" action="{{ route('surat.index') }}" role="search" class="flex flex-col gap-2 border-b border-line p-4 sm:flex-row">
+        <form method="GET" action="{{ route('surat.index') }}" role="search" aria-label="Cari surat" class="flex flex-col gap-2 border-b border-line p-4 sm:flex-row">
             <input type="hidden" name="status" value="{{ $status }}">
             <div class="relative flex-1">
                 <label for="cari-surat" class="sr-only">Cari surat</label>
@@ -54,7 +56,7 @@
         </form>
 
         @if($suratList->isEmpty())
-            <x-empty-state icon="search" title="Tidak ada surat yang cocok"
+            <x-empty-state :icon="!empty($search) ? 'search' : 'document-text'" title="Tidak ada surat yang cocok"
                 :description="!empty($search) ? 'Coba kata kunci lain atau hapus pencarian.' : 'Belum ada surat pada status ini.'">
                 @if(!empty($search))
                 <x-button variant="secondary" href="{{ route('surat.index', ['status' => $status]) }}">Hapus pencarian</x-button>
@@ -68,10 +70,10 @@
                     <tr>
                         <th scope="col">Surat</th>
                         <th scope="col">Pemohon</th>
-                        <th scope="col">Tanggal pengajuan</th>
-                        <th scope="col" class="hidden lg:table-cell">Petugas</th>
-                        <th scope="col">Status</th>
-                        <th scope="col" class="text-right"><span class="sr-only">Aksi</span></th>
+                        <th scope="col" class="w-32">Tanggal</th>
+                        <th scope="col" class="hidden w-36 lg:table-cell">Petugas</th>
+                        <th scope="col" class="w-44">Status</th>
+                        <th scope="col" class="w-48 text-right"><span class="sr-only">Aksi</span></th>
                     </tr>
                 </x-slot:head>
                 @foreach($suratList as $s)
@@ -79,6 +81,7 @@
                     <td>
                         <p class="whitespace-nowrap font-medium text-ink-900">{{ $s->jenisSurat->nama_jenis ?? '-' }}</p>
                         <p class="font-mono text-xs text-ink-600">{{ $s->nomor_surat }}</p>
+                        <p class="text-xs text-ink-600 lg:hidden">Petugas: {{ $s->created_by_name ?: ($s->pembuat->name ?? '-') }}</p>
                     </td>
                     <td>
                         <p class="whitespace-nowrap font-medium text-ink-900">{{ $s->warga->nama ?? '-' }}</p>
@@ -91,7 +94,9 @@
                     <td><x-status-badge :status="$s->status" /></td>
                     <td class="whitespace-nowrap text-right">
                         @if($s->status === 'draft')
-                        <button type="button" class="btn btn-primary btn-sm mr-1" onclick="openDialog('ajukan-{{ $s->id }}')">Ajukan</button>
+                        <button type="button" class="btn btn-primary btn-sm mr-1" onclick="openDialog('ajukan-{{ $s->id }}')">
+                            <x-icon name="arrow-right" class="size-3.5"/> Ajukan
+                        </button>
                         @endif
 
                         <a href="{{ route('surat.show', $s) }}" class="{{ $iconBtn }}" title="Lihat rincian" aria-label="Lihat rincian surat {{ $s->nomor_surat }}">
@@ -110,7 +115,7 @@
 
                         @if($s->status !== 'disetujui')
                         <button type="button" onclick="openDialog('hapus-{{ $s->id }}')" title="Hapus surat" aria-label="Hapus surat {{ $s->nomor_surat }}"
-                                class="inline-flex size-9 items-center justify-center rounded-control text-ink-600 hover:bg-danger-100 hover:text-danger-800">
+                                class="btn-icon-danger">
                             <x-icon name="trash" class="size-5"/>
                         </button>
                         @endif

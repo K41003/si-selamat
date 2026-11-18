@@ -123,7 +123,7 @@
 @layer components {
     .field {
         @apply w-full rounded-control border border-ink-500 bg-surface px-3.5 py-2.5 text-base text-ink-900
-               placeholder:text-ink-600/80 disabled:bg-canvas disabled:text-ink-600;
+               placeholder:text-ink-600/80 transition-all duration-150 disabled:bg-canvas disabled:text-ink-600;
     }
     .field[aria-invalid='true'] {
         @apply border-danger-700;
@@ -132,14 +132,80 @@
     /* Tombol: tinggi minimum 44px (area sentuh WCAG 2.5.8 / pedoman mobile) */
     .btn {
         @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-control px-4 py-2 text-sm font-semibold
-               transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60;
+               transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100;
     }
     .btn-sm { @apply min-h-9 px-3 text-sm; }
-    .btn-primary { @apply bg-brand-700 text-white hover:bg-brand-900; }
+    .btn-primary { @apply bg-brand-700 text-white shadow-xs hover:bg-brand-900 hover:shadow-sm; }
     .btn-secondary { @apply border border-ink-500 bg-surface text-ink-900 hover:bg-canvas; }
-    .btn-danger { @apply bg-danger-700 text-white hover:bg-danger-800; }
-    .btn-success { @apply bg-success-700 text-white hover:bg-success-800; }
+    .btn-danger { @apply bg-danger-700 text-white shadow-xs hover:bg-danger-800 hover:shadow-sm; }
+    .btn-success { @apply bg-success-700 text-white shadow-xs hover:bg-success-800 hover:shadow-sm; }
     .btn-ghost { @apply text-ink-700 hover:bg-brand-50; }
+    .btn-icon-danger {
+        @apply inline-flex size-9 items-center justify-center rounded-control
+               text-ink-600 hover:bg-danger-100 hover:text-danger-800 transition-all duration-150 active:scale-95;
+    }
+
+    /* Animasi halus & mikro-interaksi */
+    .animate-fade-in {
+        animation: fadeIn 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-slide-down {
+        animation: slideDown 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+}
+
+/* ==========================================================================
+   Keyframes & Animasi Dialog Native
+   ========================================================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes dialogZoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes backdropFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+dialog[open] {
+    animation: dialogZoomIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+dialog[open]::backdrop {
+    animation: backdropFadeIn 200ms ease-out forwards;
 }
 
 /* Cetak: sembunyikan elemen antarmuka */

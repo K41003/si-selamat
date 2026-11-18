@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'SI SELAMAT' }} - Sistem Informasi Surat Desa Tanjung Selamat</title>
+    <title>@yield('title', 'Dashboard') — SI SELAMAT · Desa Tanjung Selamat</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-deli-serdang.png') }}">
 
     {{-- Aset dibangun oleh Vite (Tailwind v4 + font self-host). Jalankan `npm run build`. --}}
@@ -65,10 +65,10 @@
                     @endauth
                 </div>
 
-                <nav aria-label="Menu utama" class="-mb-px flex gap-1 overflow-x-auto">
+                <nav aria-label="Menu utama" class="relative -mb-px flex gap-1 overflow-x-auto [mask-image:linear-gradient(to_right,black_90%,transparent_100%)]">
                     @foreach($menu as [$label, $url, $active])
                     <a href="{{ $url }}" @if($active) aria-current="page" @endif
-                       class="inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm transition-colors {{ $active ? 'border-brand-700 font-semibold text-brand-700' : 'border-transparent font-medium text-ink-600 hover:border-line hover:text-ink-900' }}">
+                       class="inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm transition-all duration-150 {{ $active ? 'border-brand-700 font-semibold text-brand-700' : 'border-transparent font-medium text-ink-600 hover:border-line hover:text-ink-900' }}">
                         {{ $label }}
                         @if($label === 'Validasi Kades' && $pendingCount > 0)
                         <span class="rounded-full bg-warning-100 px-1.5 text-xs font-semibold text-warning-800">{{ $pendingCount }}<span class="sr-only"> surat menunggu</span></span>
@@ -79,29 +79,18 @@
             </div>
         </header>
 
-        <main id="konten-utama" tabindex="-1" class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 focus:outline-none sm:px-6 lg:px-8 lg:py-8">
+        <main id="konten-utama" tabindex="-1" class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 focus:outline-none sm:px-6 lg:px-8 lg:py-8 animate-fade-in">
             @if(session('success'))
-            <div role="status" class="mb-6 flex items-start gap-3 rounded-control border border-success-700/30 bg-success-100/60 p-4 text-sm text-success-800 no-print">
+            <div role="status" class="mb-6 flex items-start gap-3 rounded-control border border-success-700/30 bg-success-100/60 p-4 text-sm text-success-800 no-print animate-slide-down">
                 <x-icon name="check-circle" class="mt-0.5 size-5 shrink-0"/>
                 <span>{{ session('success') }}</span>
             </div>
             @endif
 
             @if(session('error'))
-            <div role="alert" class="mb-6 flex items-start gap-3 rounded-control border border-danger-700/30 bg-danger-100/60 p-4 text-sm text-danger-800 no-print">
+            <div role="alert" class="mb-6 flex items-start gap-3 rounded-control border border-danger-700/30 bg-danger-100/60 p-4 text-sm text-danger-800 no-print animate-slide-down">
                 <x-icon name="exclamation" class="mt-0.5 size-5 shrink-0"/>
                 <span>{{ session('error') }}</span>
-            </div>
-            @endif
-
-            @if($errors->any())
-            <div role="alert" class="mb-6 rounded-control border border-danger-700/30 bg-danger-100/60 p-4 text-sm text-danger-800 no-print">
-                <p class="mb-1 font-semibold">Terdapat kesalahan pada isian form:</p>
-                <ul class="list-disc space-y-0.5 pl-5">
-                    @foreach($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                    @endforeach
-                </ul>
             </div>
             @endif
 

@@ -24,11 +24,12 @@ class DashboardController extends Controller
     private function staffDashboard()
     {
         $stats = [
-            'total_warga'    => Warga::count(),
-            'total_surat'    => Surat::count(),
-            'total_draft'    => Surat::where('status', 'draft')->count(),
-            'total_diajukan' => Surat::where('status', 'diajukan')->count(),
-            'total_disetujui'=> Surat::where('status', 'disetujui')->count(),
+            'total_warga'     => Warga::count(),
+            'total_surat'     => Surat::count(),
+            'total_draft'     => Surat::where('status', 'draft')->count(),
+            'total_diajukan'  => Surat::where('status', 'diajukan')->count(),
+            'total_disetujui' => Surat::where('status', 'disetujui')->count(),
+            'surat_bulan_ini' => Surat::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
         ];
 
         $recentSurat = Surat::with(['warga', 'jenisSurat'])
@@ -48,11 +49,12 @@ class DashboardController extends Controller
     private function kadesDashboard()
     {
         $stats = [
-            'perlu_validasi' => Surat::where('status', 'diajukan')->count(),
-            'disetujui'      => Surat::where('status', 'disetujui')->count(),
-            'ditolak'        => Surat::where('status', 'ditolak')->count(),
-            'total_surat'    => Surat::count(),
-            'total_warga'    => Warga::count(),
+            'perlu_validasi'  => Surat::where('status', 'diajukan')->count(),
+            'disetujui'       => Surat::where('status', 'disetujui')->count(),
+            'ditolak'         => Surat::where('status', 'ditolak')->count(),
+            'total_surat'     => Surat::count(),
+            'total_warga'     => Warga::count(),
+            'surat_bulan_ini' => Surat::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
         ];
 
         $pendingSurat = Surat::with(['warga', 'jenisSurat', 'pembuat'])

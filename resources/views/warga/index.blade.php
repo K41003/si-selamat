@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Data Warga')
+
 @section('content')
 @php
     $iconBtn = 'inline-flex size-9 items-center justify-center rounded-control text-ink-600 hover:bg-canvas hover:text-ink-900';
@@ -15,7 +17,7 @@
     </x-page-header>
 
     <x-card :padded="false" class="overflow-hidden">
-        <form method="GET" action="{{ route('warga.index') }}" role="search" class="flex flex-col gap-2 border-b border-line p-4 sm:flex-row">
+        <form method="GET" action="{{ route('warga.index') }}" role="search" aria-label="Cari data warga" class="flex flex-col gap-2 border-b border-line p-4 sm:flex-row">
             <div class="relative flex-1">
                 <label for="cari-warga" class="sr-only">Cari warga</label>
                 <x-icon name="search" class="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-600"/>
@@ -32,7 +34,7 @@
         </form>
 
         @if($warga->isEmpty())
-            <x-empty-state icon="search" title="Data warga tidak ditemukan"
+            <x-empty-state :icon="!empty($q) ? 'search' : 'users'" title="Data warga tidak ditemukan"
                 :description="!empty($q) ? 'Periksa ejaan nama, atau coba NIK / No. KK lengkap.' : 'Belum ada data warga yang terdaftar.'">
                 @if(!empty($q))
                 <x-button variant="secondary" href="{{ route('warga.index') }}">Hapus pencarian</x-button>
@@ -83,7 +85,7 @@
                             <x-icon name="pencil" class="size-5"/>
                         </a>
                         <button type="button" onclick="openDialog('hapus-warga-{{ $w->id }}')" title="Hapus data" aria-label="Hapus data {{ $w->nama }}"
-                                class="inline-flex size-9 items-center justify-center rounded-control text-ink-600 hover:bg-danger-100 hover:text-danger-800">
+                                class="btn-icon-danger">
                             <x-icon name="trash" class="size-5"/>
                         </button>
                     </td>

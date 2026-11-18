@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Log Aktivitas')
+
 @section('content')
 @php
     $tabs = [
@@ -43,7 +45,7 @@
         </nav>
 
         {{-- Filter pencarian + peran --}}
-        <form method="GET" action="{{ route('logs.index') }}" role="search"
+        <form method="GET" action="{{ route('logs.index') }}" role="search" aria-label="Cari log aktivitas"
               class="flex flex-col gap-2 border-b border-line p-4 sm:flex-row">
             <input type="hidden" name="jenis" value="{{ $jenis ?? '' }}">
 
@@ -76,7 +78,7 @@
 
         {{-- Tabel log --}}
         @if($logs->isEmpty())
-            <x-empty-state icon="clock"
+            <x-empty-state :icon="!empty($search) ? 'search' : 'clock'"
                            title="Tidak ada log yang ditemukan"
                            :description="!empty($search) ? 'Coba kata kunci lain atau hapus pencarian.' : 'Belum ada aktivitas pada kategori ini.'" >
                 @if(!empty($search))

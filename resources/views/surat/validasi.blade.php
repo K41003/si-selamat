@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Validasi Surat')
+
 @section('content')
 <div class="space-y-6">
     <x-page-header title="Validasi & Tanda Tangan Surat" subtitle="Permohonan surat yang menunggu peninjauan dan persetujuan Kepala Desa." />
@@ -72,7 +74,7 @@
 <x-confirm-dialog id="tolak-{{ $s->id }}" :action="route('validasi.reject', $s)"
     title="Tolak permohonan surat?" confirm-label="Tolak permohonan" variant="danger">
     <p class="mb-4">Berikan catatan perbaikan agar staf dapat memperbaiki surat <span class="font-mono">{{ $s->nomor_surat }}</span>.</p>
-    <x-field label="Alasan penolakan" name="catatan" as="textarea" rows="3" required id="catatan-{{ $s->id }}" placeholder="Contoh: Alamat usaha belum lengkap." />
+    <x-field label="Alasan penolakan" name="catatan" as="textarea" rows="3" required id="catatan-tolak-{{ $s->id }}" placeholder="Contoh: Alamat usaha belum lengkap." />
 </x-confirm-dialog>
 @endforeach
 @endsection
