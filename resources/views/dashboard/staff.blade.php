@@ -13,16 +13,18 @@
 @endphp
 
 <div class="space-y-6">
-    <x-page-header title="Dashboard" :subtitle="'Selamat datang, ' . $namaUser . '. Berikut ringkasan pelayanan surat desa.'">
-        <x-slot:actions>
-            <x-button variant="secondary" href="{{ route('warga.create') }}">
-                <x-icon name="user-plus" class="size-4"/> Tambah warga
-            </x-button>
-            <x-button href="{{ route('surat.create') }}">
-                <x-icon name="plus" class="size-4"/> Buat surat
-            </x-button>
-        </x-slot:actions>
-    </x-page-header>
+    <x-greeting eyebrow="Selamat datang," :title="$namaUser" subtitle="Berikut ringkasan pelayanan surat desa." />
+
+    {{-- Aksi cepat: pekerjaan yang paling sering dilakukan staf --}}
+    <section aria-label="Aksi cepat" class="pita">
+        <div class="grid gap-3 md:grid-cols-3">
+            <x-quick-link :href="route('surat.create')" title="Buat surat" icon="plus" hint="Mulai permohonan baru" />
+            <x-quick-link :href="route('warga.create')" title="Tambah warga" icon="user-plus" hint="Daftarkan data baru" />
+            <x-quick-link :href="route('surat.index', ['status' => 'ditolak'])" title="Perlu revisi" icon="exclamation"
+                          :hint="$stats['total_ditolak'] > 0 ? 'Surat ditolak, perlu diperbaiki' : 'Tidak ada surat ditolak'"
+                          :badge="$stats['total_ditolak'] ?: null" />
+        </div>
+    </section>
 
     {{-- Strip statistik: satu kartu, pemisah tipis, tanpa ikon warna-warni --}}
     <section aria-label="Ringkasan">
@@ -37,7 +39,7 @@
         </x-card>
     </section>
 
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         {{-- Permohonan terbaru --}}
         <x-card :padded="false" class="overflow-hidden">
             <div class="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">

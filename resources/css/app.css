@@ -17,17 +17,20 @@
     --font-serif: 'Times New Roman', Times, 'Liberation Serif', 'Noto Serif', serif; /* sama dengan surat cetak */
     --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
-    /* Brand — navy pemerintahan (kontinuitas dengan identitas lama #1E3A8A) */
-    --color-brand-50: #eff4ff;
-    --color-brand-100: #dbe6ff;
-    --color-brand-200: #bfcfff; /* border ringan brand */
-    --color-brand-600: #1d4ed8; /* tautan, fokus, nav aktif — putih di atasnya 6.70:1 */
-    --color-brand-700: #1e3a8a; /* tombol primer — putih di atasnya 10.36:1 */
-    --color-brand-900: #172554; /* sidebar, hover — putih di atasnya 14.69:1 */
-    --color-gold-400: #fbbf24;  /* aksen, HANYA di atas brand-900 (8.80:1) */
+    /* Brand — biru langit pemerintahan daerah ("Biru Langit Balai Desa", lihat style.md).
+       brand-500 HANYA dekoratif (pita, bentuk): putih di atasnya cuma 2.65:1.
+       Teks/tombol/tautan memakai brand-600 ke atas. */
+    --color-brand-50: #f0f9ff;
+    --color-brand-100: #e0f2fe; /* tab logo, latar ikon, bingkai */
+    --color-brand-200: #bae6fd; /* border ringan brand */
+    --color-brand-500: #27aae1; /* DEKORATIF SAJA — pita aksi cepat */
+    --color-brand-600: #0369a1; /* tautan, fokus, nav aktif — putih di atasnya 5.93:1 */
+    --color-brand-700: #075985; /* tombol primer — putih di atasnya 7.56:1 */
+    --color-brand-900: #0c4a6e; /* hover, teks gelap brand — putih di atasnya 9.46:1 */
+    --color-gold-400: #fbbf24;  /* aksen, HANYA di atas brand-900 (5.67:1) */
 
     /* Permukaan & teks */
-    --color-canvas: #f5f7fa;
+    --color-canvas: #f3f8fc;
     --color-surface: #ffffff;
     --color-ink-900: #0f172a;   /* teks utama 17.85:1 */
     --color-ink-700: #334155;
@@ -45,8 +48,8 @@
     --color-danger-100: #ffe4e6;
     --color-danger-700: #be123c;
     --color-danger-800: #9f1239;
-    --color-info-100: #dbeafe;
-    --color-info-800: #1e40af;
+    --color-info-100: #e0e7ff; /* indigo: beda dari brand biru langit */
+    --color-info-800: #3730a3; /* 8.06:1 di atas info-100 */
 
     /* Skala tipografi — 12px (text-xs) adalah batas minimum; isi minimal 14px (text-sm) */
     --text-title-sm: 1.125rem;            /* 18/26 judul kartu */
@@ -57,8 +60,14 @@
     --text-display--line-height: 2.375rem;
 
     /* Bentuk */
-    --radius-control: 0.5rem;
-    --radius-card: 0.75rem;
+    --radius-control: 0.875rem;
+    --radius-card: 1.5rem;
+    --radius-shell: 2.5rem;   /* cangkang login, pita aksi cepat, tab logo */
+    --radius-leaf: 5rem;    /* satu sudut besar pada bentuk "daun" */
+
+    /* Bayangan lembut ber-nuansa biru */
+    --shadow-soft: 0 10px 30px -12px rgb(7 89 133 / 0.25);
+    --shadow-card: 0 2px 6px rgb(7 89 133 / 0.12);
 }
 
 /* ==========================================================================
@@ -122,8 +131,17 @@
    ========================================================================== */
 @layer components {
     .field {
-        @apply w-full rounded-control border border-ink-500 bg-surface px-3.5 py-2.5 text-base text-ink-900
+        @apply w-full rounded-control border border-ink-500 bg-surface px-4 py-3 text-base text-ink-900
                placeholder:text-ink-600/80 transition-all duration-150 disabled:bg-canvas disabled:text-ink-600;
+    }
+    /* Dropdown: panah kustom agar proporsional dengan sudut bulat (panah bawaan browser menempel ke tepi) */
+    select.field {
+        appearance: none;
+        padding-right: 2.75rem;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 7.5l5 5 5-5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.25rem 1.25rem;
     }
     .field[aria-invalid='true'] {
         @apply border-danger-700;
@@ -131,10 +149,10 @@
 
     /* Tombol: tinggi minimum 44px (area sentuh WCAG 2.5.8 / pedoman mobile) */
     .btn {
-        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-control px-4 py-2 text-sm font-semibold
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold
                transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100;
     }
-    .btn-sm { @apply min-h-9 px-3 text-sm; }
+    .btn-sm { @apply min-h-9 px-4 text-sm; }
     .btn-primary { @apply bg-brand-700 text-white shadow-xs hover:bg-brand-900 hover:shadow-sm; }
     .btn-secondary { @apply border border-ink-500 bg-surface text-ink-900 hover:bg-canvas; }
     .btn-danger { @apply bg-danger-700 text-white shadow-xs hover:bg-danger-800 hover:shadow-sm; }
@@ -144,6 +162,44 @@
         @apply inline-flex size-9 items-center justify-center rounded-control
                text-ink-600 hover:bg-danger-100 hover:text-danger-800 transition-all duration-150 active:scale-95;
     }
+
+    /* ---- Gaya "Biru Langit Balai Desa" ---- */
+    /* Latar luar bergradasi lembut (login) */
+    .bg-langit { @apply bg-gradient-to-br from-brand-50 via-white to-brand-100; }
+
+    /* Cangkang putih besar (khusus login) */
+    .shell { @apply rounded-shell bg-surface shadow-soft; }
+
+    /* Tab logo: sudut kanan-bawah melengkung besar (padding kiri diatur di Blade) */
+    .tab-logo { @apply rounded-br-shell bg-brand-100 py-2 pr-6; }
+
+    /* Bentuk "daun": hanya sudut kiri-atas yang besar */
+    .leaf { @apply overflow-hidden rounded-tl-leaf rounded-tr-card rounded-br-card rounded-bl-card; }
+
+    /* Pita biru aksi cepat. Isinya kartu putih; JANGAN taruh teks putih langsung di atas pita. */
+    .pita { @apply rounded-shell bg-brand-500 p-4 sm:p-6; }
+    /* Outline fokus gelap (3.57:1 di atas pita; putih hanya 2.65:1) */
+    .pita :focus-visible { outline-color: var(--color-brand-900); }
+
+
+    /* ---- Halaman penuh layar, latar putih (tanpa cangkang kotak) ---- */
+    .app-shell { @apply flex w-full flex-1 flex-col bg-surface; }
+    /* Blok judul halaman: biru pucat, satu sudut kiri-atas sangat besar */
+    .hero-block { @apply rounded-tl-leaf rounded-tr-card rounded-br-card rounded-bl-card border border-brand-100 bg-brand-50; }
+    /* Pita biru dasar halaman (cangkang memotong sudut bawahnya). Isi hanya kartu putih. */
+    .band { @apply rounded-t-shell bg-brand-500 px-4 py-6 sm:px-6 sm:py-8 lg:px-8; }
+    .band :focus-visible { outline-color: var(--color-brand-900); }
+    /* Tab filter berbentuk pil */
+    .pill-tab { @apply inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink-700 transition-all duration-150 hover:bg-brand-50; }
+    .pill-tab[aria-current='page'] { @apply bg-brand-700 font-semibold text-white hover:bg-brand-700; }
+    .pill-tab[aria-current='page'] .tabular-nums { @apply text-white; }
+    /* Kartu bentuk "daun" untuk lembar surat */
+    .card-leaf { @apply rounded-tl-leaf rounded-tr-card rounded-br-card rounded-bl-card border border-line bg-surface shadow-card; }
+    /* Bilah aksi biru di dasar form */
+    .action-bar { @apply rounded-shell bg-brand-700 p-4 shadow-soft sm:px-6; }
+    .btn-on-blue { @apply bg-white text-brand-900 hover:bg-brand-100; }
+    .btn-gold { @apply bg-gold-400 text-brand-900 hover:bg-amber-300; }
+    .btn-outline-white { @apply border border-white text-white hover:bg-white/15; }
 
     /* Animasi halus & mikro-interaksi */
     .animate-fade-in {

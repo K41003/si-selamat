@@ -29,6 +29,7 @@ class DashboardController extends Controller
             'total_draft'     => Surat::where('status', 'draft')->count(),
             'total_diajukan'  => Surat::where('status', 'diajukan')->count(),
             'total_disetujui' => Surat::where('status', 'disetujui')->count(),
+            'total_ditolak'   => Surat::where('status', 'ditolak')->count(),
             'surat_bulan_ini' => Surat::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
         ];
 

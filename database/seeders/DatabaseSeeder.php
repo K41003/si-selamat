@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'staff@tanjungselamat.desa.id',
                 'password' => Hash::make('password123'),
                 'role' => 'staff',
-                'active_staff_name' => 'Amanda Rahmawati',
+                'active_staff_name' => 'Muhammad Fachrizal Ansyari, S.Kom',
                 'is_active' => true,
             ]
         );
@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
         $kades = User::updateOrCreate(
             ['username' => 'kades'],
             [
-                'name' => 'H. AHMAD FAUZI, S.Sos',
+                'name' => 'Syafi\'i Andinata',
                 'email' => 'kades@tanjungselamat.desa.id',
                 'password' => Hash::make('kades123'),
                 'role' => 'kades',
@@ -127,7 +127,7 @@ class DatabaseSeeder extends Seeder
                     'data_isian' => ['bertempat' => 'sejak tahun 2015', 'dusun' => 'II'],
                     'tanggal_pengajuan' => '2026-10-25',
                     'created_by' => $staff->id,
-                    'created_by_name' => 'Amanda Rahmawati (Staff Pelayanan)',
+                    'created_by_name' => 'Muhammad Fachrizal Ansyari, S.Kom (Staff Pelayanan)',
                 ]
             );
 
@@ -154,7 +154,7 @@ class DatabaseSeeder extends Seeder
                     'data_isian' => ['keperluan' => 'Permohonan Keringanan Uang Kuliah Tunggal (UKT) Semester Genap'],
                     'tanggal_pengajuan' => '2026-10-28',
                     'created_by' => $staff->id,
-                    'created_by_name' => 'Amanda Rahmawati (Staff Pelayanan)',
+                    'created_by_name' => 'Muhammad Fachrizal Ansyari, S.Kom (Staff Pelayanan)',
                 ]
             );
         }
@@ -169,14 +169,14 @@ class DatabaseSeeder extends Seeder
                     'data_isian' => ['tujuan' => 'Medan', 'desa' => 'Kota Matsum', 'kecamatan' => 'Medan Area', 'kabupaten' => 'Kota Medan', 'provinsi' => 'Sumatera Utara', 'keperluan' => 'Bekerja', 'lamanya' => '6 bulan'],
                     'tanggal_pengajuan' => '2026-10-29',
                     'created_by' => $staff->id,
-                    'created_by_name' => 'Amanda Rahmawati (Staff Pelayanan)',
+                    'created_by_name' => 'Muhammad Fachrizal Ansyari, S.Kom (Staff Pelayanan)',
                 ]
             );
         }
 
         // 5. Seed Activity Logs
         ActivityLog::create([
-            'user_name' => 'Amanda Rahmawati (Staff Pelayanan)',
+            'user_name' => 'Muhammad Fachrizal Ansyari, S.Kom (Staff Pelayanan)',
             'user_role' => 'Staff Pelayanan',
             'aksi' => 'Buat Permohonan Surat',
             'deskripsi' => 'Membuat permohonan surat Surat Keterangan Tidak Mampu untuk warga RINA ANGGRAENI',
@@ -185,7 +185,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         ActivityLog::create([
-            'user_name' => 'H. AHMAD FAUZI, S.Sos',
+            'user_name' => 'Syafi\'i Andinata',
             'user_role' => 'Kepala Desa',
             'aksi' => 'Validasi Surat Disetujui',
             'deskripsi' => 'Menyetujui & menerbitkan e-signature surat Surat Keterangan Domisili No. 470/001/I/TS/2026',

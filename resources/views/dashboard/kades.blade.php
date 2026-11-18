@@ -7,15 +7,18 @@
 @endphp
 
 <div class="space-y-6">
-    {{-- Header Halaman --}}
-    <x-page-header title="Dashboard Kepala Desa"
-                   :subtitle="'Selamat datang, ' . auth()->user()->name . '. Tinjau dan validasi permohonan surat administrasi warga.'">
-        <x-slot:actions>
-            <x-button variant="secondary" href="{{ route('validasi.index') }}">
-                <x-icon name="check-circle" class="size-4"/> Buka halaman validasi
-            </x-button>
-        </x-slot:actions>
-    </x-page-header>
+    <x-greeting eyebrow="Selamat datang," :title="auth()->user()->active_staff_name ?: auth()->user()->name"
+                subtitle="Tinjau dan validasi permohonan surat administrasi warga." />
+
+    {{-- Aksi cepat Kepala Desa --}}
+    <section aria-label="Aksi cepat" class="pita">
+        <div class="grid gap-3 md:grid-cols-3">
+            <x-quick-link :href="route('validasi.index')" title="Validasi surat" icon="check-circle"
+                          hint="Tinjau dan tanda tangani" :badge="$stats['perlu_validasi'] ?: null" />
+            <x-quick-link :href="route('surat.index')" title="Daftar surat" icon="document-text" hint="Semua permohonan" />
+            <x-quick-link :href="route('logs.index')" title="Log aktivitas" icon="clock" hint="Jejak audit sistem" />
+        </div>
+    </section>
 
     {{-- Strip Statistik (1 Kartu Datar, 4 Kolom) --}}
     <section aria-label="Ringkasan validasi surat">
@@ -31,7 +34,7 @@
     </section>
 
     {{-- Grid 2 Kolom Asimetris --}}
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
 
         {{-- Kolom Utama: Antrean Permohonan Menunggu Validasi (Satu Kartu Terpadu) --}}
         <x-card :padded="false" class="overflow-hidden">

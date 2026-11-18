@@ -50,10 +50,8 @@
     ];
     $todayStr = date('j') . ' ' . ($BULAN[(int)date('n')] ?? date('F')) . ' ' . date('Y');
 
-    $logoFile = public_path('images/logo-deli-serdang.png');
-    $logoSrc = file_exists($logoFile)
-        ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoFile))
-        : asset('images/logo-deli-serdang.png');
+    // Logo ringan (128px) untuk tampilan layar; versi resolusi penuh hanya dipakai di halaman cetak.
+    $logoSrc = asset('images/logo-deli-serdang-sm.png');
 @endphp
 
 <div x-data="suratBuilder({
@@ -70,9 +68,9 @@
     <input type="hidden" name="jenis_surat_id" :value="jenisId" required>
 
     {{-- KARTU 1: PILIH JENIS SURAT --}}
-    <x-card>
+    <x-card class="border-l-8 border-l-brand-700">
         <div class="space-y-1.5">
-            <label for="pilih_jenis_surat" class="block text-sm font-medium text-ink-900">
+            <label for="pilih_jenis_surat" class="block text-base font-bold text-brand-900">
                 Jenis surat <span class="font-normal text-danger-700">(wajib)</span>
             </label>
             <select id="pilih_jenis_surat" x-model.number="jenisId" class="field">
@@ -85,7 +83,7 @@
     </x-card>
 
     {{-- KARTU 2: KERTAS SURAT RESMI (LIVE SHEET EDITOR) --}}
-    <div class="rounded-card border border-line bg-surface p-6 sm:p-10 shadow-sm space-y-6">
+    <div class="card-leaf p-6 sm:p-12 sm:pt-14 space-y-6">
 
         {{-- KOP SURAT RESMI (sama dengan surat cetak) --}}
         <div class="font-serif text-ink-900">
@@ -126,20 +124,20 @@
         {{-- BANNER STATUS WARGA (DALAM SURAT) --}}
         <div class="rounded-control border px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm font-sans transition-colors"
              :class="{
-                 'border-emerald-300 bg-emerald-50/80 text-emerald-900': warga,
-                 'border-rose-300 bg-rose-50/90 text-rose-900': !warga && hasNotFound,
+                 'border-success-700/30 bg-success-100/60 text-success-800': warga,
+                 'border-danger-700/30 bg-danger-100/60 text-danger-800': !warga && hasNotFound,
                  'border-brand-200 bg-brand-50/70 text-ink-600': !warga && !hasNotFound
              }">
             <div class="flex items-center gap-2">
                 <template x-if="warga">
-                    <span class="inline-flex items-center gap-1.5 font-semibold text-emerald-700">
-                        <span class="size-2 rounded-full bg-emerald-500"></span>
+                    <span class="inline-flex items-center gap-1.5 font-semibold text-success-800">
+                        <span class="size-2 rounded-full bg-success-700"></span>
                         Data warga terisi dari database
                     </span>
                 </template>
                 <template x-if="!warga && hasNotFound">
-                    <span class="inline-flex items-center gap-1.5 font-semibold text-rose-700">
-                        <x-icon name="exclamation" class="size-4 shrink-0 text-rose-600" />
+                    <span class="inline-flex items-center gap-1.5 font-semibold text-danger-800">
+                        <x-icon name="exclamation" class="size-4 shrink-0 text-danger-700" />
                         <span>Catatan: Data tidak ada di database (<span class="font-normal" x-text="notFoundSummary"></span>)</span>
                     </span>
                 </template>
@@ -157,7 +155,7 @@
                 </template>
                 <a href="{{ route('warga.create') }}" target="_blank"
                    class="text-xs font-semibold underline transition-colors"
-                   :class="hasNotFound ? 'text-rose-700 hover:text-rose-900 font-bold' : 'text-brand-700 hover:text-brand-900'">
+                   :class="hasNotFound ? 'text-danger-800 hover:text-danger-800 font-bold' : 'text-brand-700 hover:text-brand-900'">
                     Warga belum terdaftar? Daftarkan
                 </a>
             </div>
@@ -194,7 +192,7 @@
                                @keydown.arrow-up.prevent="move(-1)"
                                @keydown.enter.prevent="choose()"
                                class="field bg-white font-medium transition-colors"
-                               :class="{'border-rose-400 bg-rose-50/20 focus:border-rose-600 focus:ring-rose-500/30': !warga && notFound[fld.key]}">
+                               :class="{'border-danger-700 bg-danger-100/30 focus:border-danger-700 focus:ring-danger-700/30': !warga && notFound[fld.key]}">
 
                         {{-- Dropdown Autocomplete Pencarian Warga --}}
                         <div x-show="open && activeField === fld.key && (results.length > 0 || (searched && !loading && !warga && form[fld.key].trim().length >= 3))"
@@ -222,14 +220,14 @@
 
                             {{-- Jika TIDAK ADA hasil --}}
                             <template x-if="results.length === 0 && searched && !loading && !warga">
-                                <div class="p-3.5 text-xs sm:text-sm bg-rose-50/90 text-rose-800">
+                                <div class="p-3.5 text-xs sm:text-sm bg-danger-100/60 text-danger-800">
                                     <div class="flex items-start gap-2.5">
-                                        <x-icon name="exclamation" class="size-4 shrink-0 text-rose-600 mt-0.5"/>
+                                        <x-icon name="exclamation" class="size-4 shrink-0 text-danger-700 mt-0.5"/>
                                         <div class="flex-1 space-y-1">
-                                            <p class="font-semibold text-rose-900">
+                                            <p class="font-semibold text-danger-800">
                                                 Data tidak ditemukan di database
                                             </p>
-                                            <p class="text-xs text-rose-700 leading-relaxed">
+                                            <p class="text-xs text-danger-800 leading-relaxed">
                                                 Tidak ditemukan warga dengan <span class="lowercase" x-text="fld.label"></span> "<strong x-text="form[fld.key]"></strong>" di database desa.
                                             </p>
                                             <div class="pt-1 flex items-center gap-2">
@@ -253,8 +251,8 @@
                         {{-- Catatan di bawah input box jika tidak ditemukan di database --}}
                         <div x-show="!warga && notFound[fld.key] && (!open || activeField !== fld.key) && !loading"
                              x-cloak
-                             class="mt-1.5 flex items-center gap-1.5 text-xs text-rose-600 font-medium">
-                            <x-icon name="exclamation" class="size-3.5 shrink-0 text-rose-500" />
+                             class="mt-1.5 flex items-center gap-1.5 text-xs text-danger-700 font-medium">
+                            <x-icon name="exclamation" class="size-3.5 shrink-0 text-danger-700" />
                             <span>
                                 <span x-text="fld.label"></span> "<strong x-text="notFound[fld.key]"></strong>" tidak ada di database warga.
                             </span>
@@ -351,14 +349,14 @@
         </div>
     </div>
 
-    {{-- KARTU 3: TOMBOL TINDAKAN (BATAL, SIMPAN SEBAGAI DRAF, AJUKAN KE KADES) --}}
-    <div class="flex flex-col-reverse gap-3 rounded-card border border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <x-button variant="ghost" href="{{ $batalUrl }}">Batal</x-button>
+    {{-- KARTU 3: BILAH AKSI (BATAL, SIMPAN SEBAGAI DRAF, AJUKAN KE KADES) --}}
+    <div class="flex flex-col-reverse gap-3 rounded-card border border-brand-100 bg-brand-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <a href="{{ $batalUrl }}" class="btn btn-ghost">Batal</a>
         <div class="flex flex-col gap-2 sm:flex-row">
             <button type="submit" name="action" value="draft" class="btn btn-secondary" @click="onSubmit($event)">Simpan sebagai draf</button>
-            <button type="submit" name="action" value="ajukan" class="btn btn-primary flex items-center gap-2" @click="onSubmit($event)">
+            <button type="submit" name="action" value="ajukan" class="btn btn-primary" @click="onSubmit($event)">
                 <span>Ajukan ke Kades</span>
-                <span class="flex size-4 items-center justify-center rounded-full border border-current text-[10px]">&#9658;</span>
+                <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
             </button>
         </div>
     </div>

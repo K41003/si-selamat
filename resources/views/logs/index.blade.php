@@ -29,17 +29,14 @@
     <x-card :padded="false" class="overflow-hidden">
 
         {{-- Tab kategori — pola sama dengan surat/index --}}
-        <nav aria-label="Filter kategori log" class="flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line px-3 sm:px-4">
+        <nav aria-label="Filter kategori log" class="flex gap-2 overflow-x-auto border-b border-line p-4">
             @foreach($tabs as $val => $label)
             @php $aktif = ($jenis ?? '') === $val; @endphp
             <a href="{{ route('logs.index', array_merge(request()->only('q', 'role'), ['jenis' => $val])) }}"
                @if($aktif) aria-current="page" @endif
-               class="inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm transition-colors
-                      {{ $aktif
-                          ? 'border-brand-700 font-semibold text-brand-700'
-                          : 'border-transparent font-medium text-ink-600 hover:border-line hover:text-ink-900' }}">
+               class="pill-tab">
                 {{ $label }}
-                <span class="font-normal tabular-nums text-ink-600">{{ $counts[$val] }}</span>
+                <span class="font-normal tabular-nums {{ $aktif ? 'text-white' : 'text-ink-600' }}">{{ $counts[$val] }}</span>
             </a>
             @endforeach
         </nav>
