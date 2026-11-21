@@ -53,6 +53,7 @@ class DashboardController extends Controller
             'perlu_validasi'  => Surat::where('status', 'diajukan')->count(),
             'disetujui'       => Surat::where('status', 'disetujui')->count(),
             'ditolak'         => Surat::where('status', 'ditolak')->count(),
+            'draft'           => Surat::where('status', 'draft')->count(),
             'total_surat'     => Surat::count(),
             'total_warga'     => Warga::count(),
             'surat_bulan_ini' => Surat::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),

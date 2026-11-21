@@ -183,6 +183,11 @@ class SuratController extends Controller
             ? "Draft surat {$jenis->nama_jenis} berhasil disimpan."
             : "Permohonan surat {$jenis->nama_jenis} berhasil diajukan ke Kepala Desa.";
 
+        // Draf: langsung ke tab "Draf" di Daftar Surat agar mudah ditemukan. Diajukan: ke detail surat.
+        if ($status === 'draft') {
+            return redirect()->route('surat.index', ['status' => 'draft'])->with('success', $message);
+        }
+
         return redirect()->route('surat.show', $surat)->with('success', $message);
     }
 
@@ -244,6 +249,10 @@ class SuratController extends Controller
             'Surat',
             $surat->id
         );
+
+        if ($status === 'draft') {
+            return redirect()->route('surat.index', ['status' => 'draft'])->with('success', "Draf surat No. {$surat->nomor_surat} berhasil diperbarui.");
+        }
 
         return redirect()->route('surat.show', $surat)->with('success', 'Data permohonan surat berhasil diperbarui.');
     }

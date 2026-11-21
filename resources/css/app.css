@@ -132,7 +132,13 @@
 @layer components {
     .field {
         @apply w-full rounded-control border border-ink-500 bg-surface px-4 py-3 text-base text-ink-900
-               placeholder:text-ink-600/80 transition-all duration-150 disabled:bg-canvas disabled:text-ink-600;
+               placeholder:text-ink-600/80 transition-colors duration-150 disabled:bg-canvas disabled:text-ink-600;
+    }
+    /* Fokus kolom isian: satu cincin bersih mengikuti sudut bulat (tanpa outline beranimasi yang meninggalkan titik) */
+    .field:focus-visible {
+        outline: none;
+        border-color: var(--color-brand-600);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-600) 35%, transparent);
     }
     /* Dropdown: panah kustom agar proporsional dengan sudut bulat (panah bawaan browser menempel ke tepi) */
     select.field {

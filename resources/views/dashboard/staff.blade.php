@@ -32,7 +32,9 @@
             <div class="grid grid-cols-2 gap-px bg-line sm:grid-cols-3 lg:grid-cols-5">
                 <x-stat label="Total penduduk" :value="number_format($stats['total_warga'])" hint="Warga terdaftar" />
                 <x-stat label="Surat bulan ini" :value="$stats['surat_bulan_ini']" hint="{{ now()->translatedFormat('F Y') }}" emphasis />
-                <x-stat label="Draf surat" :value="$stats['total_draft']" hint="Belum diajukan ke Kades" />
+                <a href="{{ route('surat.index', ['status' => 'draft']) }}" class="block focus-visible:outline-offset-[-3px]" aria-label="Lihat draf surat">
+                    <x-stat label="Draf surat" :value="$stats['total_draft']" hint="Belum diajukan ke Kades" :emphasis="$stats['total_draft'] > 0" class="h-full" />
+                </a>
                 <x-stat label="Menunggu validasi" :value="$stats['total_diajukan']" hint="Sedang ditinjau Kades" />
                 <x-stat label="Surat disetujui" :value="$stats['total_disetujui']" hint="Siap dicetak" />
             </div>

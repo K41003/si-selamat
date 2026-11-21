@@ -28,7 +28,9 @@
                 <x-stat label="Surat bulan ini" :value="$stats['surat_bulan_ini']" hint="{{ now()->translatedFormat('F Y') }}" />
                 <x-stat label="Surat disetujui" :value="$stats['disetujui']" hint="Telah terbit & bertanda tangan" />
                 <x-stat label="Surat ditolak" :value="$stats['ditolak']" hint="Memerlukan revisi staf" />
-                <x-stat label="Total penduduk" :value="number_format($stats['total_warga'])" hint="Warga terdaftar" />
+                <a href="{{ route('surat.index', ['status' => 'draft']) }}" class="block focus-visible:outline-offset-[-3px]" aria-label="Lihat draf surat">
+                    <x-stat label="Draf surat" :value="$stats['draft']" hint="Belum diajukan staf" :emphasis="$stats['draft'] > 0" class="h-full" />
+                </a>
             </div>
         </x-card>
     </section>
